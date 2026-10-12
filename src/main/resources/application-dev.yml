@@ -1,0 +1,13 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Delivery Multinivel — Perfil de Desarrollo
+# ═══════════════════════════════════════════════════════════════════════
+
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+
+logging:
+  level:
+    com.delivery: DEBUG

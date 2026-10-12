@@ -1,0 +1,75 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Delivery Multinivel — Configuración Principal
+# ═══════════════════════════════════════════════════════════════════════
+
+spring:
+  application:
+    name: delivery-multinivel
+
+  # ── PostgreSQL + PostGIS ──────────────────────────────────────────────
+  datasource:
+    url: jdbc:postgresql://localhost:5432/delivery_db
+    username: ${DB_USERNAME:delivery_user}
+    password: ${DB_PASSWORD:delivery_pass}
+    driver-class-name: org.postgresql.Driver
+
+  # ── JPA / Hibernate ──────────────────────────────────────────────────
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate          # Flyway gestiona el esquema
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  # ── Flyway ───────────────────────────────────────────────────────────
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  # ── Redis (Caché volátil, GPS Tracking con TTL 15s, Rate Limiting y Keyspace Events) ──
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      connect-timeout: 2000ms
+
+  # ── Jackson ──────────────────────────────────────────────────────────
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+# ── Seguridad JWT ────────────────────────────────────────────────────
+security:
+  jwt:
+    secret-key: ${JWT_SECRET:CAMBIAR_EN_PRODUCCION_clave_secreta_256_bits_minimo}
+    expiration-ms: 86400000       # 24 horas
+    refresh-expiration-ms: 604800000  # 7 días
+
+# ── Servidor ─────────────────────────────────────────────────────────
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+# ── OpenAPI / Swagger ────────────────────────────────────────────────
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
+# ── Logging ──────────────────────────────────────────────────────────
+logging:
+  level:
+    com.delivery: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.security: DEBUG

@@ -1,0 +1,44 @@
+# Delivery Multinivel — .gitignore
+
+# ── Build ────────────────────────────────────────────────────────────
+target/
+build/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ── IDE ──────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+*.launch
+.springBeans
+
+# ── Logs ─────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── OS ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Node / Frontend ──────────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.tempmediaStorage/
+.system_generated/
+
+# ── Secrets ──────────────────────────────────────────────────────────
+*.env
+.env.*
+!.env.example
+

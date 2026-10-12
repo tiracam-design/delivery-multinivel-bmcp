@@ -1,0 +1,32 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Perfil de integración — Testcontainers PostgreSQL + PostGIS
+# ═══════════════════════════════════════════════════════════════════════
+# Las propiedades de datasource se configuran dinámicamente
+# vía @DynamicPropertySource desde el test.
+
+spring:
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none        # Flyway gestiona el esquema
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+security:
+  jwt:
+    secret-key: test-integration-secret-key-that-is-at-least-256-bits-long
+    expiration-ms: 3600000
+    refresh-expiration-ms: 7200000
+
+logging:
+  level:
+    com.delivery: DEBUG
+    org.hibernate.SQL: DEBUG
