@@ -36,6 +36,8 @@ dist/
 frontend/dist/
 .tempmediaStorage/
 .system_generated/
+*.bundle
+
 
 # ── Secrets ──────────────────────────────────────────────────────────
 *.env
