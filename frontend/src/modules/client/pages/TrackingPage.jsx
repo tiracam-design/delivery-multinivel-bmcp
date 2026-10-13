@@ -91,33 +91,73 @@ const ORDER_STEPS = [
   { key: 'ENTREGADO', label: 'ENTREGADO', sublabel: 'PIN validado' }
 ];
 
-export default function TrackingPage({ orderId = 'a47b198c-8f12-4e9b-b6d3-2e40bf1d3902' }) {
+export default function TrackingPage({
+  orderId = 'a47b198c-8f12-4e9b-b6d3-2e40bf1d3902',
+  initialOrder = null,
+  onBackToMenu = null
+}) {
   // ── ESTADOS DEL PEDIDO ───────────────────────────────────────────────────
-  const [orderState, setOrderState] = useState({
-    id: orderId,
-    status: 'EN_CAMINO', // CREADO | EN_PREPARACION | EN_CAMINO | ENTREGADO
-    deliveryPin: '4829', // PIN OTP de 4 dígitos generado en el backend
-    merchant: {
-      name: 'Asadero El Leñador',
-      address: 'Calle Sucre 14-20 y Pichincha, Parque Central, Tulcán, Carchi',
-      lat: 0.8116,
-      lon: -77.7172
-    },
-    customer: {
-      name: 'Valeria Narváez',
-      address: 'Av. Coral 450 y Av. Manabí, Sector Terminal Terrestre, Tulcán, Carchi',
-      lat: 0.8035,
-      lon: -77.7245
-    },
-    driver: {
-      name: 'Carlos Mendoza',
-      phone: '+593 99 491 2384',
-      level: 'SENIOR',
-      rating: 4.95,
-      vehicle: 'Shineray XY200 • Placas IC-482Y (Carchi)',
-      deliveries: 1240,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'
-    },
+  const [orderState, setOrderState] = useState(() => {
+    if (initialOrder) {
+      return {
+        id: initialOrder.id || orderId,
+        status: initialOrder.status || 'EN_CAMINO',
+        deliveryPin: initialOrder.deliveryPin || '4829',
+        merchant: {
+          name: initialOrder.pickupAddress ? initialOrder.pickupAddress.split(',')[0] : 'Asadero El Leñador',
+          address: initialOrder.pickupAddress || 'Av. Sucre y Bolívar, Centro Comercial, Tulcán',
+          lat: 0.8116,
+          lon: -77.7172
+        },
+        customer: {
+          name: 'Valeria Narváez',
+          address: initialOrder.deliveryAddress || 'Calle Brasil y Av. Tulcanaza, Sector Terminal Terrestre, Tulcán',
+          lat: 0.8035,
+          lon: -77.7245
+        },
+        driver: {
+          name: 'Carlos Mendoza',
+          phone: '+593 99 491 2384',
+          level: 'SENIOR',
+          rating: 4.95,
+          vehicle: 'Shineray XY200 • Placas IC-482Y (Carchi)',
+          deliveries: 1240,
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'
+        },
+        items: [
+          { name: 'Combo Pollo Asado Completo', qty: 1, price: 11.00 },
+          { name: 'Tarifa Envío Urbano Tulcán', qty: 1, price: 1.50 }
+        ],
+        totalAmount: initialOrder.totalAmount || 12.50,
+        currency: '$ USD',
+        createdAt: initialOrder.createdAt || new Date().toISOString()
+      };
+    }
+    return {
+      id: orderId,
+      status: 'EN_CAMINO', // CREADO | EN_PREPARACION | EN_CAMINO | ENTREGADO
+      deliveryPin: '4829', // PIN OTP de 4 dígitos generado en el backend
+      merchant: {
+        name: 'Asadero El Leñador',
+        address: 'Calle Sucre 14-20 y Pichincha, Parque Central, Tulcán, Carchi',
+        lat: 0.8116,
+        lon: -77.7172
+      },
+      customer: {
+        name: 'Valeria Narváez',
+        address: 'Av. Coral 450 y Av. Manabí, Sector Terminal Terrestre, Tulcán, Carchi',
+        lat: 0.8035,
+        lon: -77.7245
+      },
+      driver: {
+        name: 'Carlos Mendoza',
+        phone: '+593 99 491 2384',
+        level: 'SENIOR',
+        rating: 4.95,
+        vehicle: 'Shineray XY200 • Placas IC-482Y (Carchi)',
+        deliveries: 1240,
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'
+      },
     etaMinutes: 10,
     distanceKm: 1.6,
     currency: '$ USD',
@@ -128,7 +168,8 @@ export default function TrackingPage({ orderId = 'a47b198c-8f12-4e9b-b6d3-2e40bf
       { name: 'Combo Pollo Asado Familiar + Papas Nativas', quantity: 1, price: '9.50' },
       { name: 'Gaseosa Tradicional 1.5L', quantity: 1, price: '1.50' }
     ]
-  });
+  };
+});
 
   // Coordenadas dinámicas del repartidor (actualizadas por WebSocket STOMP)
   const [driverLocation, setDriverLocation] = useState({
@@ -288,6 +329,14 @@ export default function TrackingPage({ orderId = 'a47b198c-8f12-4e9b-b6d3-2e40bf
       <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 py-3 shadow-sm">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
+            {onBackToMenu && (
+              <button
+                onClick={onBackToMenu}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1 border border-slate-200 shadow-sm"
+              >
+                <span>← Menú</span>
+              </button>
+            )}
             <span className="inline-flex items-center justify-center p-2 rounded-xl bg-amber-500/10 text-amber-600">
               <Icons.Navigation />
             </span>
@@ -296,7 +345,7 @@ export default function TrackingPage({ orderId = 'a47b198c-8f12-4e9b-b6d3-2e40bf
                 Seguimiento en Vivo
               </h1>
               <p className="text-xs text-slate-500 font-mono">
-                Orden #{orderState.id.slice(0, 8)}
+                Orden #{orderState.id ? orderState.id.slice(0, 8) : '4829'}
               </p>
             </div>
           </div>
