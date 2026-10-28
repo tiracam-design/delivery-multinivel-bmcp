@@ -15,7 +15,7 @@ import java.util.UUID;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "drivers")
+@Table(name = "drivers", schema = "bmcp_app")
 public class DriverEntity {
 
     @Id
@@ -63,7 +63,7 @@ public class DriverEntity {
     private Instant updatedAt;
 
     // ── Relación con usuario ────────────────────────────────────────
-
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserEntity user;

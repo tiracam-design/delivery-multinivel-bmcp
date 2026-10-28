@@ -98,7 +98,7 @@ public class OrderController {
                 deliveryAddr,
                 deliveryLoc,
                 total,
-                request.notes()
+                request.effectiveNotes()
         );
 
         Order order = createOrderUseCase.execute(command);

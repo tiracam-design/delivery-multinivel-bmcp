@@ -36,7 +36,11 @@ public record CreateOrderRequest(
 
         BigDecimal totalAmount,
 
-        String notes
+        String notes,
+
+        String paymentMethod,
+
+        String paymentReference
 ) {
     public CreateOrderRequest(
             UUID customerId,
@@ -51,7 +55,37 @@ public record CreateOrderRequest(
             String notes
     ) {
         this(customerId, merchantId, pickupAddress, pickupLatitude, pickupLongitude,
-             deliveryAddress, deliveryLatitude, deliveryLongitude, null, null, totalAmount, notes);
+             deliveryAddress, deliveryLatitude, deliveryLongitude, null, null, totalAmount, notes, null, null);
+    }
+
+    public CreateOrderRequest(
+            UUID customerId,
+            UUID merchantId,
+            String pickupAddress,
+            Double pickupLatitude,
+            Double pickupLongitude,
+            String deliveryAddress,
+            Double deliveryLatitude,
+            Double deliveryLongitude,
+            List<OrderItemRequest> items,
+            BigDecimal shippingFee,
+            BigDecimal totalAmount,
+            String notes
+    ) {
+        this(customerId, merchantId, pickupAddress, pickupLatitude, pickupLongitude,
+             deliveryAddress, deliveryLatitude, deliveryLongitude, items, shippingFee, totalAmount, notes, null, null);
+    }
+
+    /**
+     * Retorna las notas enriquecidas con la información del método de pago y referencia.
+     */
+    public String effectiveNotes() {
+        if (paymentMethod != null && !paymentMethod.isBlank()) {
+            String payRef = (paymentReference != null && !paymentReference.isBlank()) ? paymentReference : "N/A";
+            String payInfo = "[PAGO: " + paymentMethod.toUpperCase() + " | REF: " + payRef + "]";
+            return notes != null && !notes.isBlank() ? payInfo + " - " + notes : payInfo;
+        }
+        return notes;
     }
 
     /**

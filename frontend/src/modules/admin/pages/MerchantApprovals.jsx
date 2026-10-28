@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { validateEcuadorianRuc } from '../../../utils/ecuadorianRucValidator';
+import { buildApiUrl, getAuthToken } from '../../../services/api';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
@@ -443,6 +444,24 @@ export default function MerchantApprovals() {
 
   // Notificaciones Toast de acción
   const [toast, setToast] = useState(null);
+  const [systemMetrics, setSystemMetrics] = useState(null);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const token = getAuthToken();
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch(buildApiUrl('/api/v1/admin/metrics'), { headers });
+        if (res.ok) {
+          const data = await res.json();
+          setSystemMetrics(data);
+        }
+      } catch (e) {
+        // Fallback to computed local indicators
+      }
+    };
+    fetchMetrics();
+  }, []);
 
   // Mostrar Toast
   const showToast = (message, type = 'success') => {
@@ -455,15 +474,17 @@ export default function MerchantApprovals() {
   // ── KPIS SUPERIORES CALCULADOS Y DE FLOTA ──────────────────────────────────
   const fleetKpis = useMemo(() => {
     return {
-      activeMerchants: 142,
+      activeMerchants: systemMetrics?.totalMerchants ?? 142,
       activeMerchantsGrowth: '+12% este mes',
-      onlineDrivers: 86,
+      onlineDrivers: systemMetrics?.totalDrivers ?? 86,
       onlineDriversRoute: '64 en ruta • 22 disponibles',
-      ordersInProgress: 318,
+      ordersInProgress: systemMetrics?.totalOrders ?? 318,
       ordersAverageTime: 'Tiempo prom.: 24 min',
-      pendingApprovals: applications.filter((app) => app.status === 'PENDING').length
+      pendingApprovals: (systemMetrics?.pendingMerchantsCount != null && systemMetrics?.pendingDriversCount != null)
+        ? (systemMetrics.pendingMerchantsCount + systemMetrics.pendingDriversCount)
+        : applications.filter((app) => app.status === 'PENDING').length
     };
-  }, [applications]);
+  }, [applications, systemMetrics]);
 
   // ── FILTRADO DINÁMICO DE LA TABLA ──────────────────────────────────────────
   const filteredApplications = useMemo(() => {
@@ -492,7 +513,7 @@ export default function MerchantApprovals() {
 
   // ── MANEJADORES DE ACCIÓN RÁPIDA ───────────────────────────────────────────
   // Aprobar
-  const handleApprove = (appId) => {
+  const handleApprove = async (appId) => {
     const appToApprove = applications.find((a) => a.id === appId);
     setApplications((prev) =>
       prev.map((app) => (app.id === appId ? { ...app, status: 'APPROVED' } : app))
@@ -500,6 +521,25 @@ export default function MerchantApprovals() {
 
     if (selectedApplication?.id === appId) {
       setSelectedApplication(null);
+    }
+
+    try {
+      const token = getAuthToken();
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(appId);
+      if (token && isUUID) {
+        const endpoint = appToApprove?.type === 'DRIVER'
+          ? `/api/v1/admin/approvals/drivers/${appId}/approve`
+          : `/api/v1/admin/approvals/merchants/${appId}/approve`;
+        await fetch(buildApiUrl(endpoint), {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('Backend approval sync notice:', err);
     }
 
     showToast(
@@ -516,29 +556,51 @@ export default function MerchantApprovals() {
   };
 
   // Confirmar rechazo
-  const handleConfirmReject = () => {
+  const handleConfirmReject = async () => {
     if (!rejectingApplication) return;
+    const targetApp = rejectingApplication;
+    const reasonText = `${rejectionReason}${
+      customRejectionComment ? ` - Detalle: ${customRejectionComment}` : ''
+    }`;
 
     setApplications((prev) =>
       prev.map((app) =>
-        app.id === rejectingApplication.id
+        app.id === targetApp.id
           ? {
               ...app,
               status: 'REJECTED',
-              rejectionFeedback: `${rejectionReason}${
-                customRejectionComment ? ` - Detalle: ${customRejectionComment}` : ''
-              }`
+              rejectionFeedback: reasonText
             }
           : app
       )
     );
 
-    if (selectedApplication?.id === rejectingApplication.id) {
+    if (selectedApplication?.id === targetApp.id) {
       setSelectedApplication(null);
     }
 
+    try {
+      const token = getAuthToken();
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetApp.id);
+      if (token && isUUID) {
+        const endpoint = targetApp.type === 'DRIVER'
+          ? `/api/v1/admin/approvals/drivers/${targetApp.id}/reject`
+          : `/api/v1/admin/approvals/merchants/${targetApp.id}/reject`;
+        await fetch(buildApiUrl(endpoint), {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ reason: reasonText })
+        });
+      }
+    } catch (err) {
+      console.warn('Backend rejection sync notice:', err);
+    }
+
     showToast(
-      `Solicitud de ${rejectingApplication.businessName} rechazada. Notificación enviada al solicitante.`,
+      `Solicitud de ${targetApp.businessName} rechazada. Notificación enviada al solicitante.`,
       'danger'
     );
     setRejectingApplication(null);

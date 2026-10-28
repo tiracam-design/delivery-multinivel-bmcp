@@ -13,7 +13,7 @@ import java.util.UUID;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "driver_locations")
+@Table(name = "driver_locations", schema = "bmcp_app")
 public class DriverLocationEntity {
 
     @Id

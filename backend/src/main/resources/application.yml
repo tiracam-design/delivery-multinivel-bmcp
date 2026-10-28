@@ -8,7 +8,7 @@ spring:
 
   # ── PostgreSQL + PostGIS ──────────────────────────────────────────────
   datasource:
-    url: jdbc:postgresql://localhost:5432/delivery_db
+    url: jdbc:postgresql://localhost:5432/delivery_db?currentSchema=bmcp_app,public
     username: ${DB_USERNAME:delivery_user}
     password: ${DB_PASSWORD:delivery_pass}
     driver-class-name: org.postgresql.Driver
@@ -21,6 +21,7 @@ spring:
     show-sql: false
     properties:
       hibernate:
+        default_schema: bmcp_app
         format_sql: true
         jdbc:
           time_zone: UTC
@@ -29,6 +30,8 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    default-schema: bmcp_app
+    schemas: bmcp_app
     locations: classpath:db/migration
 
   # ── Redis (Caché volátil, GPS Tracking con TTL 15s, Rate Limiting y Keyspace Events) ──

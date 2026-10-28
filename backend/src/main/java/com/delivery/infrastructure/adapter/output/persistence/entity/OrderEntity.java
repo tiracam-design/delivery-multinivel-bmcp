@@ -23,7 +23,7 @@ import java.util.UUID;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", schema = "bmcp_app")
 public class OrderEntity {
 
     @Id

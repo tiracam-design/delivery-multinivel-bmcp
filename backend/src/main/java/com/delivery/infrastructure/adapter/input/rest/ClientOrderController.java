@@ -91,7 +91,7 @@ public class ClientOrderController {
                 request.deliveryAddress(),
                 deliveryLocation,
                 request.totalAmount(),
-                request.notes()
+                request.effectiveNotes()
         );
 
         OrderResponseDTO createdOrder = clientOrderUseCase.createOrder(command);

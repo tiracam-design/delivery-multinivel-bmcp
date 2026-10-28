@@ -19,7 +19,7 @@ import java.util.UUID;
  * <p>Equivalente en el servidor de las operaciones de auditoría legal y fiscal.</p>
  */
 @RestController
-@RequestMapping({"/v1/modules/admin/approvals", "/v1/admin/approvals"})
+@RequestMapping({"/v1/modules/admin/approvals", "/v1/admin/approvals", "/api/v1/admin/approvals", "/api/v1/modules/admin/approvals"})
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Módulo Admin - Aprobaciones", description = "Auditoría legal de comercios y repartidores de Tulcán")
 public class MerchantApprovalsController {

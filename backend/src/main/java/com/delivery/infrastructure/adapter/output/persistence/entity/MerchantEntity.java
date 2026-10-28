@@ -14,7 +14,7 @@ import java.util.UUID;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "merchants")
+@Table(name = "merchants", schema = "bmcp_app")
 public class MerchantEntity {
 
     @Id

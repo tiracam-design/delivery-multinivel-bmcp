@@ -1,17 +1,22 @@
 package com.delivery.infrastructure.adapter.output.persistence.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Entidad JPA que mapea la tabla {@code users}.
+ * Entidad JPA que mapea la tabla {@code users} en el esquema privado {@code bmcp_app}.
+ *
+ * <p>Aplica `@JsonIgnore` sobre el campo `passwordHash` para garantizar que las credenciales
+ * nunca se serialicen en respuestas JSON de la API.</p>
  *
  * @since 1.0.0
  */
 @Entity
-@Table(name = "users")
+@Table(name = "users", schema = "bmcp_app")
 public class UserEntity {
 
     @Id
@@ -22,6 +27,8 @@ public class UserEntity {
     @Column(name = "email", nullable = false, unique = true, length = 255)
     private String email;
 
+    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
@@ -55,12 +62,24 @@ public class UserEntity {
 
     protected UserEntity() {}
 
+    public UserEntity(String email, String passwordHash, String fullName, String phone, String role) {
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.fullName = fullName;
+        this.phone = phone;
+        this.role = role;
+        this.active = true;
+    }
+
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    @JsonIgnore
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
     public String getPhone() { return phone; }

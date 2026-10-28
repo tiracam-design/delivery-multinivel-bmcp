@@ -39,7 +39,7 @@ import java.util.*;
  * @since 1.0.0
  */
 @RestController
-@RequestMapping({"/v1/admin", "/admin"})
+@RequestMapping({"/v1/admin", "/admin", "/api/v1/admin"})
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Módulo Administrador", description = "Endpoints de control, auditoría legal y métricas globales")
 @SecurityRequirement(name = "bearerAuth")

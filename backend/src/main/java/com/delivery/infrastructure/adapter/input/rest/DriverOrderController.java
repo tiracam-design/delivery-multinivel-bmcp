@@ -39,7 +39,7 @@ import java.util.UUID;
  * @since 1.0.0
  */
 @RestController
-@RequestMapping("/api/v1/driver/orders")
+@RequestMapping({"/v1/driver/orders", "/api/v1/driver/orders"})
 @PreAuthorize("hasRole('DRIVER')")
 @Tag(name = "Módulo Repartidor - Pedidos", description = "Endpoints para la operativa del repartidor y validación de entregas")
 @SecurityRequirement(name = "bearerAuth")

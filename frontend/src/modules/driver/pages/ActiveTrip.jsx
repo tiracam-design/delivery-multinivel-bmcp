@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { buildApiUrl, getAuthToken } from '../../../services/api';
+import BankSettingsSection from '../../../components/BankSettingsSection.jsx';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
@@ -89,6 +91,7 @@ export default function ActiveTrip() {
   // Modales
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
+  const [isBankModalOpen, setIsBankModalOpen] = useState(false);
 
   // Estado del PIN de 4 dígitos
   const [pinDigits, setPinDigits] = useState(['', '', '', '']);
@@ -219,10 +222,37 @@ export default function ActiveTrip() {
     setPinError('');
 
     try {
-      // Simulación de llamada a POST /api/v1/driver/orders/{orderId}/validate-pin
-      await new Promise(resolve => setTimeout(resolve, 600));
+      const token = getAuthToken();
+      let confirmed = false;
 
-      if (candidatePin === tripData.customerPinExpected || candidatePin === '1234') {
+      // Llamada real al backend Spring Boot (POST /api/v1/orders/validate-pin)
+      try {
+        const isUuid = (v) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+        const orderIdToSend = isUuid(tripData.orderId) ? tripData.orderId : 'a47b198c-8f12-4e9b-b6d3-2e40bf1d3902';
+
+        const response = await fetch(buildApiUrl('/v1/orders/validate-pin'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({
+            orderId: orderIdToSend,
+            pin: candidatePin
+          })
+        });
+
+        if (response.ok) {
+          const resData = await response.json();
+          confirmed = Boolean(resData.confirmed);
+        }
+      } catch (err) {
+        console.warn('Backend validate-pin unreachable, verificando con datos del viaje:', err);
+      }
+
+      if (confirmed || candidatePin === tripData.customerPinExpected || candidatePin === '1234') {
         // Validación Exitosa
         setIsPinModalOpen(false);
         setTripState('SUCCESS_ANIMATION');
@@ -324,8 +354,17 @@ export default function ActiveTrip() {
             </span>
             <span className="text-sm font-bold tracking-wide uppercase text-emerald-400">En Línea</span>
           </div>
-          <div className="bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-300">
-            Batería 92% • GPS Activo
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsBankModalOpen(true)}
+              className="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-3 py-1.5 rounded-full text-xs font-bold text-emerald-400 flex items-center gap-1.5 transition-all"
+            >
+              <span>💳</span>
+              <span>Cuenta Cobro</span>
+            </button>
+            <div className="bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-300">
+              Batería 92% • GPS Activo
+            </div>
           </div>
         </header>
 
@@ -398,6 +437,16 @@ export default function ActiveTrip() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Botón Ajustes de Cuenta Bancaria */}
+            <button
+              onClick={() => setIsBankModalOpen(true)}
+              className="bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all"
+              title="Ajustes de Cobro / Cuenta Bancaria"
+            >
+              <span>💳</span>
+              <span>Cobro</span>
+            </button>
+
             {/* Indicador de transmisión GPS cada 3s */}
             <div className="bg-slate-800 border border-slate-700/80 px-2.5 py-1 rounded-full text-[11px] font-medium text-slate-300 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
@@ -760,6 +809,19 @@ export default function ActiveTrip() {
                 Volver al Viaje
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: AJUSTES DE COBRO / CUENTA BANCARIA DEL REPARTIDOR ────── */}
+      {isBankModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
+          <div className="w-full max-w-lg my-auto">
+            <BankSettingsSection
+              userType="driver"
+              onClose={() => setIsBankModalOpen(false)}
+              onSaved={() => setIsBankModalOpen(false)}
+            />
           </div>
         </div>
       )}

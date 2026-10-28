@@ -12,7 +12,7 @@ import java.util.UUID;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "order_status_history")
+@Table(name = "order_status_history", schema = "bmcp_app")
 public class OrderStatusHistoryEntity {
 
     @Id

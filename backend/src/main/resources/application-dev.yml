@@ -7,6 +7,9 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: bmcp_app
 
 logging:
   level:

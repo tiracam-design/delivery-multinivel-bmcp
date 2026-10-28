@@ -33,7 +33,7 @@ import java.util.UUID;
  * @since 1.0.0
  */
 @RestController
-@RequestMapping("/api/v1/merchant/orders")
+@RequestMapping({"/v1/merchant/orders", "/api/v1/merchant/orders"})
 @PreAuthorize("hasRole('MERCHANT')")
 @Tag(name = "Módulo Comercio - Pedidos", description = "Endpoints para la gestión de pedidos por el comercio")
 @SecurityRequirement(name = "bearerAuth")

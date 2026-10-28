@@ -13,7 +13,7 @@ import java.util.UUID;
  * @since 1.0.0
  */
 @Entity
-@Table(name = "products")
+@Table(name = "products", schema = "bmcp_app")
 public class ProductEntity {
 
     @Id

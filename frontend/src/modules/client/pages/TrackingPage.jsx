@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { getWebSocketUrl } from '../../../services/api';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
@@ -208,7 +209,7 @@ export default function TrackingPage({
   // ── CONEXIÓN WEBSOCKET STOMP /topic/orders/{orderId}/tracking ───────────
   useEffect(() => {
     let stompClient = null;
-    const socketUrl = 'ws://localhost:8080/ws-delivery';
+    const socketUrl = getWebSocketUrl('/ws-delivery');
     const topicPath = `/topic/orders/${orderId}/tracking`;
 
     // Conexión reactiva si @stomp/stompjs estuviese instalado en el bundler
