@@ -42,8 +42,9 @@ services:
           property: password
 
   # ── 2. Frontend React 18 + Vite (Static Site) ─────────────────────────
-  - type: static
+  - type: web
     name: delivery-bmcp-frontend
+    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
