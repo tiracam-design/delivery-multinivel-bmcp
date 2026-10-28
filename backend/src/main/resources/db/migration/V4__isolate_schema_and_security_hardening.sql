@@ -71,22 +71,21 @@ $$;
 -- Revocar permisos de creación y modificación general en public
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 
--- Revocar privilegios de modificación sobre esquemas del sistema PostGIS
-REVOKE ALL ON SCHEMA tiger FROM PUBLIC, bmcp_app_user;
-REVOKE ALL ON SCHEMA tiger_data FROM PUBLIC, bmcp_app_user;
-REVOKE ALL ON SCHEMA topology FROM PUBLIC, bmcp_app_user;
-
+-- Revocar privilegios de modificación sobre esquemas del sistema PostGIS (si existen en el host)
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'tiger') THEN
+        EXECUTE 'REVOKE ALL ON SCHEMA tiger FROM PUBLIC, bmcp_app_user';
         REVOKE ALL ON ALL TABLES IN SCHEMA tiger FROM PUBLIC, bmcp_app_user;
         REVOKE ALL ON ALL ROUTINES IN SCHEMA tiger FROM PUBLIC, bmcp_app_user;
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'tiger_data') THEN
+        EXECUTE 'REVOKE ALL ON SCHEMA tiger_data FROM PUBLIC, bmcp_app_user';
         REVOKE ALL ON ALL TABLES IN SCHEMA tiger_data FROM PUBLIC, bmcp_app_user;
         REVOKE ALL ON ALL ROUTINES IN SCHEMA tiger_data FROM PUBLIC, bmcp_app_user;
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'topology') THEN
+        EXECUTE 'REVOKE ALL ON SCHEMA topology FROM PUBLIC, bmcp_app_user';
         REVOKE ALL ON ALL TABLES IN SCHEMA topology FROM PUBLIC, bmcp_app_user;
         REVOKE ALL ON ALL ROUTINES IN SCHEMA topology FROM PUBLIC, bmcp_app_user;
     END IF;
@@ -105,7 +104,13 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA bmcp_app GRANT USAGE, SELECT, UPDATE ON SEQUE
 GRANT USAGE ON SCHEMA public TO bmcp_app_user;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO bmcp_app_user;
 
--- Garantizar propiedad y control total del esquema al usuario de migraciones/DBA
-GRANT ALL PRIVILEGES ON SCHEMA bmcp_app TO delivery_user;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA bmcp_app TO delivery_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA bmcp_app TO delivery_user;
+-- Garantizar propiedad y control total del esquema al usuario de migraciones/DBA si existe
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'delivery_user') THEN
+        GRANT ALL PRIVILEGES ON SCHEMA bmcp_app TO delivery_user;
+        GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA bmcp_app TO delivery_user;
+        GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA bmcp_app TO delivery_user;
+    END IF;
+END
+$$;
