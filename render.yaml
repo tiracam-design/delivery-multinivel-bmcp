@@ -1,0 +1,64 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Render Blueprint — Delivery Multinivel BMCP (Capa Gratuita)
+# Infraestructura como Código (IaC) para Backend, Frontend y PostgreSQL
+# ═══════════════════════════════════════════════════════════════════════
+
+services:
+  # ── 1. Backend Spring Boot (Web Service en Contenedor Docker) ────────
+  - type: web
+    name: delivery-bmcp-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    healthCheckPath: /api/v3/api-docs
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_HOST
+        fromDatabase:
+          name: delivery-bmcp-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: delivery-bmcp-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: delivery-bmcp-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: delivery-bmcp-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: delivery-bmcp-db
+          property: password
+
+  # ── 2. Frontend React 18 + Vite (Static Site) ─────────────────────────
+  - type: static
+    name: delivery-bmcp-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://delivery-bmcp-backend.onrender.com/api
+
+# ── 3. Base de Datos Administrada PostgreSQL (Render Free) ────────────
+databases:
+  - name: delivery-bmcp-db
+    databaseName: delivery_db
+    user: delivery_user
+    plan: free
+    region: oregon

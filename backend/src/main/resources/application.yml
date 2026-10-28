@@ -8,9 +8,9 @@ spring:
 
   # ── PostgreSQL + PostGIS ──────────────────────────────────────────────
   datasource:
-    url: jdbc:postgresql://localhost:5432/delivery_db?currentSchema=bmcp_app,public
-    username: ${DB_USERNAME:delivery_user}
-    password: ${DB_PASSWORD:delivery_pass}
+    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:delivery_db}?currentSchema=bmcp_app,public}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:delivery_user}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:delivery_pass}}
     driver-class-name: org.postgresql.Driver
 
   # ── JPA / Hibernate ──────────────────────────────────────────────────
@@ -39,8 +39,11 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
       timeout: 2000ms
       connect-timeout: 2000ms
+      ssl:
+        enabled: ${REDIS_SSL:false}
 
   # ── Jackson ──────────────────────────────────────────────────────────
   jackson:
@@ -57,7 +60,7 @@ security:
 
 # ── Servidor ─────────────────────────────────────────────────────────
 server:
-  port: 8080
+  port: ${PORT:8080}
   servlet:
     context-path: /api
 

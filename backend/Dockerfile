@@ -1,6 +1,6 @@
 # ═══════════════════════════════════════════════════════════════════════
 # Dockerfile — Backend Spring Boot (Delivery Multinivel BMCP)
-# Multi-stage build optimizado para Java 21 y producción segura
+# Multi-stage build optimizado para Java 21 y despliegue en la nube (Render)
 # ═══════════════════════════════════════════════════════════════════════
 
 # ── Etapa 1: Compilación y Empaquetado ────────────────────────────────
@@ -29,11 +29,12 @@ COPY --from=builder /workspace/target/delivery-multinivel-*.jar app.jar
 RUN chown -R appuser:appgroup /app
 USER appuser
 
-# Variables de entorno por defecto (personalizables en despliegue)
+# Variables de entorno adaptadas al puerto dinámico de Render y memoria gratuita (512MB RAM)
 ENV SPRING_PROFILES_ACTIVE=prod \
-    SERVER_PORT=8080 \
-    JAVA_OPTS="-Xms256m -Xmx512m -Djava.security.egd=file:/dev/./urandom"
+    PORT=8080 \
+    JAVA_OPTS="-Xms128m -Xmx384m -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 
-EXPOSE 8080
+EXPOSE 8080 10000
 
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
+# Se inyecta -Dserver.port=${PORT:-8080} para asegurar enlace con el puerto dinámico de Render
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -Dserver.port=${PORT:-8080} -jar app.jar"]
