@@ -23,10 +23,10 @@ const TULCAN_RESTAURANTS = [
       qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_LENADOR_2201928374'
     },
     menu: [
-      { id: 'prod-001', name: 'Combo Pollo Asado Completo', desc: 'Pollo entero al carbón, papas fritas familiares y ensalada fresca', price: 11.00 },
-      { id: 'prod-002', name: 'Medio Pollo Asado con Menestra', desc: 'Medio pollo, menestra de lenteja, arroz blanco y patacones', price: 6.50 },
-      { id: 'prod-003', name: 'Porción Extra de Papas Fritas', desc: 'Papas fritas caseras crocantes con salsas artesanales', price: 2.00 },
-      { id: 'prod-004', name: 'Bebida Familiar 1.5L', desc: 'Gaseosa fría tamaño familiar', price: 2.00 }
+      { id: '22222222-2222-2222-2222-000000000001', name: 'Pollo Asado Entero Familiar', desc: 'Incluye porción grande de papas pastusas, menestra y ensalada fresca', price: 11.00 },
+      { id: '22222222-2222-2222-2222-000000000002', name: 'Medio Pollo Asado con Guarnición', desc: 'Medio pollo asado al leño con papas fritas y ensalada', price: 6.00 },
+      { id: '22222222-2222-2222-2222-000000000003', name: 'Combo Empanadas de Morocho (x3)', desc: 'Empanadas de carne de res con ají tulcaneño', price: 2.50 },
+      { id: '22222222-2222-2222-2222-000000000004', name: 'Jarra de Jugo de Mora Silvestre 1L', desc: 'Jugo natural de fruta fresca de los Andes', price: 2.00 }
     ]
   },
   {
@@ -48,9 +48,10 @@ const TULCAN_RESTAURANTS = [
       qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_LACARCHI_1040582910'
     },
     menu: [
-      { id: 'prod-101', name: 'Café Pastuso + Empanadas de Viento', desc: 'Café de altura filtrado con 2 empanadas crujientes con azúcar', price: 2.50 },
-      { id: 'prod-102', name: 'Desayuno Carchiense Completo', desc: 'Tigrillo con queso amasado de Tulcán, 2 huevos fritos y café negro', price: 4.50 },
-      { id: 'prod-103', name: 'Queso Amasado de Tulcán con Dulce de Higo', desc: 'Postre tradicional carchiense con almíbar de panela', price: 3.00 }
+      { id: '22222222-2222-2222-2222-000000000005', name: 'Desayuno Tradicional del Carchi', desc: 'Huevos al gusto, queso tierno de Tulcán, pan de casa y café pasado', price: 3.50 },
+      { id: '22222222-2222-2222-2222-000000000006', name: 'Café Pasado Lojano de Altura', desc: 'Taza de café arábica recién filtrado', price: 1.50 },
+      { id: '22222222-2222-2222-2222-000000000005', name: 'Café Pastuso + Empanadas de Viento', desc: 'Café de altura filtrado con 2 empanadas crujientes con azúcar', price: 2.50 },
+      { id: '22222222-2222-2222-2222-000000000005', name: 'Desayuno Carchiense Completo', desc: 'Tigrillo con queso amasado de Tulcán, 2 huevos fritos y café negro', price: 4.50 }
     ]
   },
   {
@@ -72,8 +73,8 @@ const TULCAN_RESTAURANTS = [
       qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_FARMACIA_4419203817'
     },
     menu: [
-      { id: 'prod-201', name: 'Kit Básico de Primeros Auxilios', desc: 'Alcohol antiséptico, gasas, vendas, curitas y analgésicos', price: 8.50 },
-      { id: 'prod-202', name: 'Multivitamínico Efervescente C', desc: 'Tubo de 20 tabletas efervescentes sabor naranja', price: 5.00 }
+      { id: '33333333-3333-3333-3333-000000000001', name: 'Kit Básico de Primeros Auxilios', desc: 'Alcohol antiséptico, gasas, vendas, curitas y analgésicos', price: 8.50 },
+      { id: '33333333-3333-3333-3333-000000000002', name: 'Multivitamínico Efervescente C', desc: 'Tubo de 20 tabletas efervescentes sabor naranja', price: 5.00 }
     ]
   }
 ];
@@ -81,7 +82,7 @@ const TULCAN_RESTAURANTS = [
 export default function RestaurantCheckout({ onOrderConfirmed }) {
   const [selectedRestaurant, setSelectedRestaurant] = useState(TULCAN_RESTAURANTS[0]);
   const [cart, setCart] = useState([
-    { id: 'prod-001', name: 'Combo Pollo Asado Completo', price: 11.00, quantity: 1 }
+    { id: '22222222-2222-2222-2222-000000000001', name: 'Pollo Asado Entero Familiar', price: 11.00, quantity: 1 }
   ]);
   const [deliveryAddress, setDeliveryAddress] = useState('Calle Brasil y Av. Tulcanaza (Sector Terminal Terrestre), Tulcán, Carchi');
   const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' | 'pichincha' | 'deuna'
@@ -274,29 +275,71 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
         console.warn('API REST unreachable, usando respuesta estructurada:', err);
       }
 
-      // Si no hay backend conectado en vivo o hubo timeout, asegurar datos completos
+      const freshPin = String(Math.floor(1000 + Math.random() * 9000));
+      const freshOrderId = 'ord-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+
+      // Si no hay backend conectado en vivo o hubo timeout, asegurar datos completos con PIN dinámico
       if (!createdOrder) {
         createdOrder = {
-          id: 'a47b198c-8f12-4e9b-b6d3-2e40bf1d3902',
+          id: freshOrderId,
           customerId: orderPayload.customerId,
           merchantId: orderPayload.merchantId,
           status: 'CREATED',
           pickupAddress: orderPayload.pickupAddress,
           deliveryAddress: orderPayload.deliveryAddress,
           totalAmount: totalAmount,
-          deliveryPin: '4829', // PIN generado
+          deliveryPin: freshPin, // PIN dinámico generado
           notes: orderPayload.notes,
           createdAt: new Date().toISOString()
         };
       }
 
-      setCreatedOrderData(createdOrder);
+      // Enriquecer el pedido con los ítems, subtotal, comercio y PIN verificado
+      const fullOrder = {
+        ...createdOrder,
+        id: createdOrder.id || freshOrderId,
+        orderNumber: '#' + (createdOrder.id ? createdOrder.id.slice(0, 4).toUpperCase() : Math.floor(1000 + Math.random() * 9000)),
+        deliveryPin: createdOrder.deliveryPin || freshPin,
+        items: cart.map((i) => ({
+          id: i.id,
+          name: i.name,
+          quantity: i.quantity,
+          price: Number(i.price).toFixed(2),
+          unitPrice: Number(i.price)
+        })),
+        subtotal: Number(subtotal).toFixed(2),
+        purchasePrice: Number(subtotal).toFixed(2),
+        shippingFee: Number(SHIPPING_FEE).toFixed(2),
+        shippingCost: Number(SHIPPING_FEE).toFixed(2),
+        totalAmount: Number(createdOrder.totalAmount || totalAmount).toFixed(2),
+        restaurantName: selectedRestaurant.name,
+        restaurantCategory: selectedRestaurant.category,
+        restaurantAddress: selectedRestaurant.address,
+        pickupAddress: orderPayload.pickupAddress,
+        deliveryAddress: orderPayload.deliveryAddress,
+        customerName: currentUser?.fullName || 'Valeria Narváez',
+        customerPhone: '+593 99 491 2384',
+        paymentMethod: normalizedPaymentMethod,
+        paymentReference: effectivePaymentRef,
+        notes: enrichedNotes,
+        createdAt: createdOrder.createdAt || new Date().toISOString()
+      };
+
+      // Persistir en localStorage para sincronización inmediata entre pestañas (Cliente <-> Repartidor)
+      try {
+        localStorage.setItem('delivery_active_order', JSON.stringify(fullOrder));
+        window.dispatchEvent(new CustomEvent('order-updated', { detail: fullOrder }));
+      } catch (e) {
+        console.warn('Error al guardar delivery_active_order en localStorage:', e);
+      }
+
+      setCreatedOrderData(fullOrder);
 
       // Esperar brevemente para mostrar el éxito y redirigir
       setTimeout(() => {
         setIsSubmitting(false);
         if (onOrderConfirmed) {
-          onOrderConfirmed(createdOrder);
+          onOrderConfirmed(fullOrder);
         }
       }, 1200);
     } catch (error) {
@@ -338,7 +381,7 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
         <div className="lg:col-span-2 space-y-8">
           {/* Selector de Restaurantes */}
           <div>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
               <span>🏪</span>
               <span>1. Comercios Disponibles en Tulcán</span>
             </h2>
@@ -355,18 +398,18 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
                     className={`text-left p-4 rounded-xl border transition-all ${
                       isSelected
                         ? 'bg-amber-500/10 border-amber-500 shadow-md ring-2 ring-amber-500/20'
-                        : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
+                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                         {res.badge}
                       </span>
-                      <span className="text-xs font-bold text-amber-600">{res.rating}</span>
+                      <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{res.rating}</span>
                     </div>
-                    <h3 className="font-bold text-slate-900 text-sm">{res.name}</h3>
-                    <p className="text-xs text-slate-500 mt-1">{res.category}</p>
-                    <p className="text-[11px] text-slate-400 mt-2 truncate">📍 {res.address}</p>
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm">{res.name}</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{res.category}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2 truncate">📍 {res.address}</p>
                   </button>
                 );
               })}
@@ -374,16 +417,16 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
           </div>
 
           {/* Menú de Productos del Restaurante Seleccionado */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <span>🍽️</span>
                   <span>Menú de {selectedRestaurant.name}</span>
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">Precios oficiales en Dólares de Estados Unidos ($ USD)</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Precios oficiales en Dólares de Estados Unidos ($ USD)</p>
               </div>
-              <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
                 ⏱️ Tiempo prep: {selectedRestaurant.prepTime}
               </span>
             </div>
@@ -394,20 +437,20 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
                 return (
                   <div
                     key={product.id}
-                    className="p-4 rounded-xl border border-slate-200 hover:border-amber-300 transition-all flex flex-col justify-between bg-slate-50/50"
+                    className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-amber-300 dark:hover:border-amber-500/50 transition-all flex flex-col justify-between bg-slate-50/50 dark:bg-slate-800/40"
                   >
                     <div>
                       <div className="flex justify-between items-start gap-2">
-                        <h4 className="font-bold text-slate-900 text-sm">{product.name}</h4>
-                        <span className="text-sm font-black text-emerald-600 whitespace-nowrap">
+                        <h4 className="font-bold text-slate-900 dark:text-white text-sm">{product.name}</h4>
+                        <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                           ${product.price.toFixed(2)} USD
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1 line-clamp-2">{product.desc}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{product.desc}</p>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center">
-                      <span className="text-[11px] text-slate-400">Entrega rápida</span>
+                    <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                      <span className="text-[11px] text-slate-400 dark:text-slate-500">Entrega rápida</span>
                       {inCart ? (
                         <div className="flex items-center gap-2 bg-amber-500 text-slate-950 px-2 py-1 rounded-lg font-bold text-xs shadow-sm">
                           <button onClick={() => removeFromCart(product.id)} className="px-1.5 hover:bg-amber-600 rounded">
@@ -421,7 +464,7 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
                       ) : (
                         <button
                           onClick={() => addToCart(product)}
-                          className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm"
+                          className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm"
                         >
                           <span>+ Agregar</span>
                         </button>
@@ -434,33 +477,33 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
           </div>
 
           {/* Datos de Entrega en Tulcán */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4 transition-colors">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <span>📍</span>
               <span>2. Dirección de Entrega en Tulcán</span>
             </h2>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Dirección del Domicilio (Tulcán, Carchi)
               </label>
               <input
                 type="text"
                 value={deliveryAddress}
                 onChange={(e) => setDeliveryAddress(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Indicaciones para el Repartidor
               </label>
               <input
                 type="text"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
               />
             </div>
           </div>
@@ -468,13 +511,13 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
 
         {/* ── COLUMNA DERECHA: RESUMEN DEL CARRITO & CHECKOUT (1 col) ── */}
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 sticky top-20">
-            <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-              <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 sticky top-20 transition-colors">
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
                 <span>🛒</span>
                 <span>Tu Carrito de Compra</span>
               </h3>
-              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                 {cart.length} {cart.length === 1 ? 'ítem' : 'ítems'}
               </span>
             </div>
@@ -487,15 +530,15 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
             ) : (
               <div className="space-y-3 mb-6 max-h-56 overflow-y-auto pr-1">
                 {cart.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center text-xs pb-2 border-b border-slate-50">
+                  <div key={item.id} className="flex justify-between items-center text-xs pb-2 border-b border-slate-50 dark:border-slate-800">
                     <div className="flex-1 pr-2">
-                      <span className="font-bold text-slate-800 block truncate">{item.name}</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200 block truncate">{item.name}</span>
                       <span className="text-slate-400">
                         {item.quantity} x ${item.price.toFixed(2)} USD
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-slate-900">
+                      <span className="font-extrabold text-slate-900 dark:text-white">
                         ${(item.price * item.quantity).toFixed(2)} USD
                       </span>
                       <button
@@ -511,8 +554,8 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
             )}
 
             {/* Método de Pago */}
-            <div className="mb-6 pt-2 border-t border-slate-100">
-              <label className="block text-xs font-bold text-slate-700 mb-2">
+            <div className="mb-6 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
                 Método de Pago en Tulcán
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -522,8 +565,8 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
                   onClick={() => setPaymentMethod('cash')}
                   className={`p-2 rounded-xl text-center border text-xs font-bold transition-all ${
                     paymentMethod === 'cash'
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-300 ring-1 ring-emerald-500'
+                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
                 >
                   <span className="block text-base mb-0.5">💵</span>
@@ -536,8 +579,8 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
                   onClick={() => setPaymentMethod('pichincha')}
                   className={`p-2 rounded-xl text-center border text-xs font-bold transition-all ${
                     paymentMethod === 'pichincha'
-                      ? 'border-yellow-500 bg-yellow-50 text-yellow-900 ring-1 ring-yellow-500'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/40 text-yellow-900 dark:text-yellow-300 ring-1 ring-yellow-500'
+                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
                 >
                   <span className="block text-base mb-0.5">🏦</span>
@@ -550,8 +593,8 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
                   onClick={() => setPaymentMethod('deuna')}
                   className={`p-2 rounded-xl text-center border text-xs font-bold transition-all ${
                     paymentMethod === 'deuna'
-                      ? 'border-purple-500 bg-purple-50 text-purple-900 ring-1 ring-purple-500'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/40 text-purple-900 dark:text-purple-300 ring-1 ring-purple-500'
+                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
                 >
                   <span className="block text-base mb-0.5">📱</span>
@@ -739,26 +782,26 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
             </div>
 
             {/* Desglose Financiero en $ USD */}
-            <div className="bg-slate-50 p-4 rounded-xl space-y-2 mb-6 border border-slate-200/80">
-              <div className="flex justify-between text-xs text-slate-600">
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl space-y-2 mb-6 border border-slate-200/80 dark:border-slate-700/80 transition-colors">
+              <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
                 <span>Subtotal Productos</span>
-                <span className="font-semibold text-slate-800">${subtotal.toFixed(2)} USD</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">${subtotal.toFixed(2)} USD</span>
               </div>
-              <div className="flex justify-between text-xs text-slate-600">
+              <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
                 <span className="flex items-center gap-1">
                   <span>Envío Urbano Tulcán</span>
-                  <span className="text-[10px] text-emerald-600 font-bold">(Tarifa fija)</span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">(Tarifa fija)</span>
                 </span>
-                <span className="font-semibold text-slate-800">${(cart.length > 0 ? SHIPPING_FEE : 0).toFixed(2)} USD</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">${(cart.length > 0 ? SHIPPING_FEE : 0).toFixed(2)} USD</span>
               </div>
-              <div className="flex justify-between text-xs text-slate-600">
+              <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
                 <span>Tarifa de Plataforma BMCP</span>
-                <span className="font-semibold text-emerald-600">$0.00 USD (Exento)</span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">$0.00 USD (Exento)</span>
               </div>
-              <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
-                <span className="text-sm font-extrabold text-slate-900">Total a Pagar</span>
-                <span className="text-lg font-black text-slate-950">
-                  ${totalAmount.toFixed(2)} <span className="text-xs font-bold text-slate-500">USD</span>
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between items-baseline">
+                <span className="text-sm font-extrabold text-slate-900 dark:text-white">Total a Pagar</span>
+                <span className="text-lg font-black text-slate-950 dark:text-amber-400">
+                  ${totalAmount.toFixed(2)} <span className="text-xs font-bold text-slate-500 dark:text-slate-400">USD</span>
                 </span>
               </div>
             </div>

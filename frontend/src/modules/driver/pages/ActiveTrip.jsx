@@ -8,7 +8,7 @@ import BankSettingsSection from '../../../components/BankSettingsSection.jsx';
  * ═══════════════════════════════════════════════════════════════════════════════
  *
  * Características principales:
- * 1. Vista vertical de pantalla completa mobile-first (h-screen flex flex-col justify-between bg-slate-900 text-white).
+ * 1. Vista vertical de pantalla completa mobile-first (h-screen flex flex-col justify-between bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-white).
  * 2. Direcciones de recogida (Restaurante) y entrega (Cliente) con navegación GPS (Google Maps / Waze).
  * 3. Botón de Emergencia / Incidente (bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-4 rounded-xl).
  * 4. Botón Gigante "Llegué al Domicilio - Ingresar PIN" con Modal numérico de 4 dígitos.
@@ -59,7 +59,7 @@ const Icons = {
     </svg>
   ),
   Phone: () => (
-    <svg className="w-4 h-4 mr-1 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="w-4 h-4 mr-1 text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
     </svg>
   ),
@@ -69,18 +69,18 @@ const Icons = {
     </svg>
   ),
   Backspace: () => (
-    <svg className="w-6 h-6 mx-auto text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="w-6 h-6 mx-auto text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414-6.414a2 2 0 011.414-.586H19a2 2 0 012 2v10a2 2 0 01-2 2h-7.172a2 2 0 01-1.414-.586L3 12z" />
     </svg>
   ),
   Close: () => (
-    <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="w-6 h-6 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
   )
 };
 
-export default function ActiveTrip() {
+export default function ActiveTrip({ activeOrder = null }) {
   // ── ESTADOS DEL FLUJO DEL VIAJE ───────────────────────────────────────────
   // Estados posibles: 'ACTIVE_TRIP' | 'SUCCESS_ANIMATION' | 'SEARCHING_ORDERS'
   const [tripState, setTripState] = useState('ACTIVE_TRIP');
@@ -106,30 +106,122 @@ export default function ActiveTrip() {
   const [gpsCoordinates, setGpsCoordinates] = useState({ lat: 0.811600, lon: -77.717200 });
   const [telemetryCount, setTelemetryCount] = useState(0);
 
-  // Datos mock de la orden activa en Tulcán, Carchi
-  const tripData = {
-    orderId: 'a47b198c-8f12-4e9b-b6d3-2e40bf1d3902',
-    orderNumber: '#1048',
-    customerPinExpected: '4829', // PIN generado por la BMCP
-    estimatedEarnings: '$2.50 USD',
-    pickup: {
-      name: 'Asadero El Leñador',
-      address: 'Calle Sucre 14-20 y Pichincha, Parque Central, Tulcán, Carchi',
-      instructions: 'Recoger en barra con número de orden #1048. Pedido listo y empacado.',
-      lat: 0.811600,
-      lon: -77.717200
-    },
-    delivery: {
-      clientName: 'Valeria Narváez',
-      phone: '+593 99 491 2384',
-      address: 'Av. Coral 450 y Av. Manabí, Sector Terminal Terrestre, Tulcán, Carchi',
-      instructions: 'Entregar en la entrada principal del condominio. Timbre 2B.',
-      lat: 0.803500,
-      lon: -77.724500
-    },
-    distanceRemaining: '1.6 km',
-    timeRemaining: '6 min'
+  // Helper para leer la orden activa persistida en localStorage
+  const getStoredOrder = () => {
+    if (activeOrder) return activeOrder;
+    try {
+      const stored = localStorage.getItem('delivery_active_order');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.warn('Error leyendo delivery_active_order:', e);
+    }
+    return null;
   };
+
+  // Constructor de datos del viaje a partir del pedido activo
+  const buildTripDataFromOrder = (order) => {
+    const defaultData = {
+      orderId: 'a47b198c-8f12-4e9b-b6d3-2e40bf1d3902',
+      orderNumber: '#1048',
+      customerPinExpected: '4829',
+      purchasePrice: '11.00',
+      shippingFee: '1.50',
+      totalAmount: '12.50',
+      estimatedEarnings: '$1.50 USD',
+      paymentMethod: 'EFECTIVO',
+      paymentReference: '',
+      items: [
+        { name: 'Combo Pollo Asado Completo', quantity: 1, price: '11.00' }
+      ],
+      pickup: {
+        name: 'Asadero El Leñador',
+        address: 'Calle Sucre 14-20 y Pichincha, Parque Central, Tulcán, Carchi',
+        instructions: 'Recoger en barra orden #1048. Pedido listo y empacado.',
+        lat: 0.811600,
+        lon: -77.717200
+      },
+      delivery: {
+        clientName: 'Valeria Narváez',
+        phone: '+593 99 491 2384',
+        address: 'Av. Coral 450 y Av. Manabí, Sector Terminal Terrestre, Tulcán, Carchi',
+        instructions: 'Entregar en la entrada principal del condominio. Timbre 2B.',
+        lat: 0.803500,
+        lon: -77.724500
+      },
+      distanceRemaining: '1.6 km',
+      timeRemaining: '6 min'
+    };
+
+    if (!order) return defaultData;
+
+    const subtotal = order.subtotal || order.purchasePrice || (order.totalAmount ? (Number(order.totalAmount) - 1.50).toFixed(2) : '11.00');
+    const shipping = order.shippingFee || order.shippingCost || '1.50';
+    const total = order.totalAmount || (Number(subtotal) + Number(shipping)).toFixed(2);
+    const ordNum = order.orderNumber || (order.id ? '#' + order.id.slice(0, 4).toUpperCase() : '#1048');
+
+    return {
+      orderId: order.id || defaultData.orderId,
+      orderNumber: ordNum,
+      customerPinExpected: order.deliveryPin || '4829',
+      purchasePrice: Number(subtotal).toFixed(2),
+      shippingFee: Number(shipping).toFixed(2),
+      totalAmount: Number(total).toFixed(2),
+      estimatedEarnings: `$${Number(shipping).toFixed(2)} USD`,
+      paymentMethod: (order.paymentMethod || 'EFECTIVO').toUpperCase(),
+      paymentReference: order.paymentReference || '',
+      items: order.items && order.items.length > 0 ? order.items : defaultData.items,
+      pickup: {
+        name: order.restaurantName || defaultData.pickup.name,
+        address: order.restaurantAddress || order.pickupAddress || defaultData.pickup.address,
+        instructions: `Verificar entrega en barra ${ordNum}. Precio de compra: $${Number(subtotal).toFixed(2)} USD.`,
+        lat: order.pickupLatitude || 0.811600,
+        lon: order.pickupLongitude || -77.717200
+      },
+      delivery: {
+        clientName: order.customerName || defaultData.delivery.clientName,
+        phone: order.customerPhone || defaultData.delivery.phone,
+        address: order.deliveryAddress || defaultData.delivery.address,
+        instructions: (order.paymentMethod === 'CASH' || order.paymentMethod === 'EFECTIVO'
+          ? `Cobrar al cliente $${Number(total).toFixed(2)} USD en efectivo. `
+          : `Pago verificado por ${order.paymentMethod || 'Transferencia'} [${order.paymentReference || 'OK'}]. NO cobrar. `)
+          + 'Solicitar PIN de seguridad para finalizar.',
+        lat: order.deliveryLatitude || 0.803500,
+        lon: order.deliveryLongitude || -77.724500
+      },
+      distanceRemaining: '1.6 km',
+      timeRemaining: '6 min'
+    };
+  };
+
+  // Datos reactivos de la orden activa en Tulcán, Carchi
+  const [tripData, setTripData] = useState(() => buildTripDataFromOrder(getStoredOrder()));
+
+  // ── SINCRONIZACIÓN REACTIVA CON EL PEDIDO ACTIVO & LOCALSTORAGE ──────────
+  useEffect(() => {
+    const syncTrip = (order) => {
+      const active = order || getStoredOrder();
+      if (active) {
+        setTripData(buildTripDataFromOrder(active));
+      }
+    };
+
+    if (activeOrder) {
+      syncTrip(activeOrder);
+    } else {
+      syncTrip();
+    }
+
+    const handleUpdate = (e) => {
+      syncTrip(e?.detail);
+    };
+
+    window.addEventListener('order-updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('order-updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, [activeOrder]);
 
   // ── EMISOR DE TELEMETRÍA GPS CADA 3 SEGUNDOS ──────────────────────────────
   useEffect(() => {
@@ -323,14 +415,14 @@ export default function ActiveTrip() {
 
           {/* Tarjeta de ganancia acreditada */}
           <div className="bg-slate-800/90 border border-emerald-500/40 rounded-2xl p-4 shadow-xl backdrop-blur-md mb-6">
-            <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Ganancia acreditada al instante</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Ganancia acreditada al instante</p>
             <p className="text-3xl font-black text-emerald-400 mt-1">{tripData.estimatedEarnings}</p>
             <p className="text-xs text-emerald-300/80 mt-1 flex items-center justify-center gap-1">
               <span>✓ Saldo disponible en tu billetera digital</span>
             </p>
           </div>
 
-          <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
+          <div className="flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
             <span>Transfiriendo a radar de nuevos pedidos...</span>
           </div>
@@ -344,7 +436,7 @@ export default function ActiveTrip() {
   // ═══════════════════════════════════════════════════════════════════════════
   if (tripState === 'SEARCHING_ORDERS') {
     return (
-      <div className="h-screen w-full flex flex-col justify-between bg-slate-900 text-white p-6 relative overflow-hidden">
+      <div className="h-screen w-full flex flex-col justify-between bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-white p-6 relative overflow-hidden transition-colors duration-200">
         {/* Cabecera de estado del Repartidor */}
         <header className="flex items-center justify-between z-10 pt-2">
           <div className="flex items-center gap-2">
@@ -362,7 +454,7 @@ export default function ActiveTrip() {
               <span>💳</span>
               <span>Cuenta Cobro</span>
             </button>
-            <div className="bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-300">
+            <div className="bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors">
               Batería 92% • GPS Activo
             </div>
           </div>
@@ -378,14 +470,14 @@ export default function ActiveTrip() {
             </div>
           </div>
 
-          <h2 className="text-2xl font-black text-white tracking-tight mb-2">
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
             Buscando nuevos pedidos
           </h2>
-          <p className="text-sm text-slate-400 max-w-xs">
+          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
             Mantente en zonas comerciales de alta demanda para recibir ofertas a menos de 3.0 km.
           </p>
 
-          <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/90 border border-slate-700/80 text-xs font-medium text-slate-300">
+          <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors">
             <span>Ubicación GPS:</span>
             <span className="font-mono text-emerald-400 font-bold">{gpsCoordinates.lat}, {gpsCoordinates.lon}</span>
           </div>
@@ -393,13 +485,13 @@ export default function ActiveTrip() {
 
         {/* Footer con resumen de ganancias y botón para simular nuevo viaje */}
         <footer className="z-10 space-y-3 pb-2">
-          <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 flex items-center justify-between">
+          <div className="bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex items-center justify-between transition-colors">
             <div>
-              <p className="text-xs text-slate-400 uppercase font-semibold">Ganancias de Hoy</p>
-              <p className="text-xl font-extrabold text-white">$32.50 USD</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Ganancias de Hoy</p>
+              <p className="text-xl font-extrabold text-slate-900 dark:text-white">$32.50 USD</p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-slate-400 uppercase font-semibold">Viajes Realizados</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Viajes Realizados</p>
               <p className="text-xl font-extrabold text-emerald-400">7 entregas</p>
             </div>
           </div>
@@ -423,16 +515,16 @@ export default function ActiveTrip() {
   // PANTALLA PRINCIPAL: VISTA VERTICAL DE PANTALLA COMPLETA DEL VIAJE ACTIVO
   // ═══════════════════════════════════════════════════════════════════════════
   return (
-    <div className="h-screen flex flex-col justify-between bg-slate-900 text-white overflow-hidden relative select-none">
+    <div className="h-screen flex flex-col justify-between bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-white overflow-hidden relative select-none transition-colors duration-200">
 
       {/* ── BARRA SUPERIOR: ESTADO DEL VIAJE Y TELEMETRÍA ──────────────────────── */}
-      <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 z-10 shrink-0">
+      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors px-4 py-3 z-10 shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
             <div>
               <span className="text-xs font-black tracking-widest uppercase text-emerald-400">En Ruta</span>
-              <span className="text-xs text-slate-400 ml-2 font-mono">Orden {tripData.orderNumber}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 ml-2 font-mono">Orden {tripData.orderNumber}</span>
             </div>
           </div>
 
@@ -448,7 +540,7 @@ export default function ActiveTrip() {
             </button>
 
             {/* Indicador de transmisión GPS cada 3s */}
-            <div className="bg-slate-800 border border-slate-700/80 px-2.5 py-1 rounded-full text-[11px] font-medium text-slate-300 flex items-center gap-1.5">
+            <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 px-2.5 py-1 rounded-full text-[11px] font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5 transition-colors">
               <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
               <span>GPS 3s ({telemetryCount})</span>
             </div>
@@ -467,7 +559,7 @@ export default function ActiveTrip() {
             className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeDestination === 'PICKUP'
                 ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/30'
-                : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700'
             }`}
           >
             <Icons.Store />
@@ -479,12 +571,28 @@ export default function ActiveTrip() {
             className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeDestination === 'DELIVERY'
                 ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
-                : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700'
             }`}
           >
             <Icons.MapPin />
             <span>2. Entrega Cliente</span>
           </button>
+        </div>
+
+        {/* ── BANNER FINANCIERO: PRECIO DE COMPRA & TOTAL REFLEJADOS EN REPARTIDOR ── */}
+        <div className="mt-2.5 bg-slate-100 dark:bg-slate-800/90 rounded-xl p-2.5 border border-slate-200 dark:border-slate-700/80 flex items-center justify-between text-xs shadow-inner transition-colors">
+          <div>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold block uppercase tracking-wider">Precio Compra:</span>
+            <span className="text-sm font-black text-amber-400 font-mono">${tripData.purchasePrice} USD</span>
+          </div>
+          <div className="text-center border-x border-slate-200 dark:border-slate-700/80 px-2.5">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold block uppercase tracking-wider">Total a Cobrar:</span>
+            <span className="text-sm font-black text-slate-900 dark:text-white font-mono">${tripData.totalAmount} USD</span>
+          </div>
+          <div className="text-right">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold block uppercase tracking-wider">Tu Ganancia:</span>
+            <span className="text-sm font-black text-emerald-400 font-mono">{tripData.estimatedEarnings}</span>
+          </div>
         </div>
       </header>
 
@@ -505,7 +613,7 @@ export default function ActiveTrip() {
                 {activeDestination === 'PICKUP' ? <Icons.Store /> : <Icons.MapPin />}
               </div>
               <div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   {activeDestination === 'PICKUP' ? 'Punto de Recogida' : 'Punto de Entrega'}
                 </span>
                 <h2 className="text-base font-extrabold text-white leading-tight">
@@ -516,23 +624,93 @@ export default function ActiveTrip() {
 
             {/* Distancia y tiempo restante */}
             <div className="text-right">
-              <span className="text-xs font-bold text-slate-400 block">{tripData.timeRemaining}</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block">{tripData.timeRemaining}</span>
               <span className="text-sm font-black text-emerald-400">{tripData.distanceRemaining}</span>
             </div>
           </div>
 
           {/* Dirección completa */}
-          <div className="mt-3 bg-slate-950/60 rounded-xl p-3 border border-slate-800">
-            <p className="text-xs text-slate-300 font-medium leading-relaxed">
+          <div className="mt-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl p-3 border border-slate-200 dark:border-slate-800 transition-colors">
+            <p className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
               {activeDestination === 'PICKUP' ? tripData.pickup.address : tripData.delivery.address}
             </p>
-            <p className="text-[11px] text-amber-400/90 mt-1.5 font-medium flex items-center gap-1">
+            <p className="text-[11px] text-amber-600 dark:text-amber-400/90 mt-1.5 font-medium flex items-center gap-1">
               <span>ℹ️ Notas:</span>
-              <span className="text-slate-300">
+              <span className="text-slate-600 dark:text-slate-300">
                 {activeDestination === 'PICKUP' ? tripData.pickup.instructions : tripData.delivery.instructions}
               </span>
             </p>
           </div>
+
+          {/* 🍗 RETIRO EN RESTAURANTE: REFLEJAR PRECIO DE COMPRA E ÍTEMS DEL PEDIDO */}
+          {activeDestination === 'PICKUP' && (
+            <div className="mt-3 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-extrabold text-amber-300 flex items-center gap-1.5">
+                  <span>🍗</span>
+                  <span>Ítems Comprados por el Cliente:</span>
+                </span>
+                <span className="text-xs font-black text-amber-400 font-mono bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
+                  Compra: ${tripData.purchasePrice} USD
+                </span>
+              </div>
+              <div className="space-y-1.5 text-xs text-slate-200">
+                {tripData.items && tripData.items.map((it, idx) => (
+                  <div key={idx} className="flex justify-between items-center bg-slate-100 dark:bg-slate-900/70 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors">
+                    <span className="font-medium text-slate-900 dark:text-white">{it.quantity}x {it.name}</span>
+                    <span className="font-mono text-amber-400 font-bold">${it.price || it.unitPrice}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2.5 pt-2 border-t border-amber-500/20 flex justify-between items-center text-[11px]">
+                <span className="text-slate-500 dark:text-slate-400">Pago en caja del comercio:</span>
+                <span className="font-bold text-emerald-400">✓ Prepago Plataforma Tulcán (No pagar en barra)</span>
+              </div>
+            </div>
+          )}
+
+          {/* 📦 ENTREGA AL CLIENTE: REFLEJAR MONTO EXACTO A COBRAR Y MÉTODO DE PAGO */}
+          {activeDestination === 'DELIVERY' && (
+            <div className={`mt-3 rounded-xl p-3 border transition-all ${
+              tripData.paymentMethod === 'EFECTIVO' || tripData.paymentMethod === 'CASH'
+                ? 'bg-emerald-950/50 border-emerald-500/50 text-emerald-100'
+                : 'bg-indigo-950/50 border-indigo-500/50 text-indigo-100'
+            }`}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-extrabold uppercase tracking-wider flex items-center gap-1">
+                  <span>{tripData.paymentMethod === 'EFECTIVO' || tripData.paymentMethod === 'CASH' ? '💵' : '💳'}</span>
+                  <span>
+                    {tripData.paymentMethod === 'EFECTIVO' || tripData.paymentMethod === 'CASH'
+                      ? 'Cobro Requerido en Efectivo'
+                      : 'Pago Digital Previo'}
+                  </span>
+                </span>
+                <span className="text-base font-black font-mono text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-900/60 px-2.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 transition-colors">
+                  ${tripData.totalAmount} USD
+                </span>
+              </div>
+
+              {tripData.paymentMethod === 'EFECTIVO' || tripData.paymentMethod === 'CASH' ? (
+                <div className="text-xs space-y-1">
+                  <p className="font-semibold text-emerald-300">
+                    Cobrar exactamente <strong className="text-white text-sm">${tripData.totalAmount} USD</strong> al cliente (Compra: ${tripData.purchasePrice} + Envío: ${tripData.shippingFee}).
+                  </p>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                    ⚠️ Recibe el dinero completo antes o al momento de solicitar el PIN.
+                  </p>
+                </div>
+              ) : (
+                <div className="text-xs space-y-1">
+                  <p className="font-medium text-indigo-300">
+                    El cliente ya pagó <strong>${tripData.totalAmount} USD</strong> vía {tripData.paymentMethod} {tripData.paymentReference ? `(Ref: ${tripData.paymentReference})` : ''}.
+                  </p>
+                  <p className="text-[11px] text-emerald-300 font-bold">
+                    ✓ NO COBRAR DINERO. Solo solicita el código PIN OTP de 4 dígitos.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* BOTONES DE INTEGRACIÓN GPS EXTERNA (GOOGLE MAPS & WAZE) */}
           <div className="grid grid-cols-2 gap-2 mt-3.5">
@@ -555,8 +733,8 @@ export default function ActiveTrip() {
         </section>
 
         {/* TARJETA INFORMATIVA RESUMEN DE AMBOS PUNTOS */}
-        <section className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-3.5 space-y-2.5">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
+        <section className="bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-3.5 space-y-2.5 transition-colors">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
             <span>Ruta del Viaje BMCP</span>
             <span className="text-emerald-400">Anti-Fraude Activo</span>
           </div>
@@ -565,22 +743,22 @@ export default function ActiveTrip() {
           <div className="relative pl-6 space-y-3 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-700">
             <div className="relative">
               <span className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-amber-400" />
-              <p className="text-xs font-bold text-white">{tripData.pickup.name}</p>
-              <p className="text-[11px] text-slate-400 truncate">{tripData.pickup.address}</p>
+              <p className="text-xs font-bold text-slate-900 dark:text-white">{tripData.pickup.name}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{tripData.pickup.address}</p>
             </div>
             <div className="relative">
               <span className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-emerald-400" />
-              <p className="text-xs font-bold text-white">{tripData.delivery.clientName}</p>
-              <p className="text-[11px] text-slate-400 truncate">{tripData.delivery.address}</p>
+              <p className="text-xs font-bold text-slate-900 dark:text-white">{tripData.delivery.clientName}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{tripData.delivery.address}</p>
             </div>
           </div>
         </section>
 
         {/* BOTÓN DE CONTACTO RÁPIDO AL CLIENTE */}
-        <div className="flex items-center justify-between bg-slate-800/40 border border-slate-700/50 rounded-xl p-2.5">
+        <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 rounded-xl p-2.5 transition-colors">
           <div className="text-xs">
-            <span className="text-slate-400 block text-[10px] uppercase font-bold">Cliente</span>
-            <span className="font-semibold text-white">{tripData.delivery.clientName}</span>
+            <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-bold">Cliente</span>
+            <span className="font-semibold text-slate-900 dark:text-white">{tripData.delivery.clientName}</span>
           </div>
           <a
             href={`tel:${tripData.delivery.phone}`}
@@ -593,7 +771,7 @@ export default function ActiveTrip() {
       </main>
 
       {/* ── FOOTER INFERIOR: BOTÓN DE EMERGENCIA Y BOTÓN GIGANTE DE PIN ───────── */}
-      <footer className="bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-4 space-y-2.5 shrink-0 z-10">
+      <footer className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 transition-colors p-4 space-y-2.5 shrink-0 z-10">
 
         {/* 3. BOTÓN DE EMERGENCIA / INCIDENTE (Estilo exacto solicitado) */}
         <button
@@ -626,24 +804,24 @@ export default function ActiveTrip() {
           MODAL NUMÉRICO DE 4 CAJAS PARA EL PIN DE ENTREGA
           ═════════════════════════════════════════════════════════════════════════ */}
       {isPinModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl flex flex-col justify-between max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl flex flex-col justify-between max-h-[92vh] overflow-y-auto transition-colors">
 
             {/* Cabecera del modal */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
                   <Icons.Key />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-white">Validar PIN Anti-Fraude</h3>
-                  <p className="text-[11px] text-slate-400">Solicita los 4 dígitos al cliente para completar el viaje</p>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">Validar PIN Anti-Fraude</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Solicita los 4 dígitos al cliente para completar el viaje</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setIsPinModalOpen(false)}
-                className="p-1 rounded-full hover:bg-slate-800 text-slate-400 transition-colors"
+                className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
               >
                 <Icons.Close />
               </button>
@@ -668,10 +846,10 @@ export default function ActiveTrip() {
                     onChange={(e) => handleDigitChange(idx, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(idx, e)}
                     disabled={isValidatingPin || attemptsRemaining <= 0}
-                    className={`w-14 h-16 sm:w-16 sm:h-20 text-center text-3xl sm:text-4xl font-black rounded-2xl border-2 transition-all outline-none bg-slate-950 ${
+                    className={`w-14 h-16 sm:w-16 sm:h-20 text-center text-3xl sm:text-4xl font-black rounded-2xl border-2 transition-all outline-none bg-slate-50 dark:bg-slate-950 ${
                       digit
-                        ? 'border-emerald-500 text-emerald-400 shadow-lg shadow-emerald-500/20'
-                        : 'border-slate-700 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20'
+                        ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-lg shadow-emerald-500/20'
+                        : 'border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
                     }`}
                   />
                 ))}
@@ -684,8 +862,8 @@ export default function ActiveTrip() {
                 </p>
               )}
 
-              <p className="text-[11px] text-slate-400 mt-2">
-                Intentos restantes: <span className="font-bold text-white">{attemptsRemaining} de 3</span>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+                Intentos restantes: <span className="font-bold text-slate-900 dark:text-white">{attemptsRemaining} de 3</span>
               </p>
             </div>
 
@@ -705,7 +883,7 @@ export default function ActiveTrip() {
               <button
                 type="button"
                 onClick={handleClearPin}
-                className="h-12 rounded-xl bg-slate-800/60 hover:bg-slate-700 text-xs font-bold text-slate-400 uppercase transition-colors border border-slate-700/60"
+                className="h-12 rounded-xl bg-slate-800/60 hover:bg-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase transition-colors border border-slate-700/60"
               >
                 Borrar
               </button>
@@ -753,22 +931,22 @@ export default function ActiveTrip() {
           MODAL DE EMERGENCIA / INCIDENTES
           ═════════════════════════════════════════════════════════════════════════ */}
       {isEmergencyModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/85 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-          <div className="bg-slate-900 border border-red-500/40 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-red-500/40 transition-colors w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2 text-red-500">
                 <Icons.AlertTriangle />
-                <h3 className="text-base font-black text-white">Centro de Incidentes</h3>
+                <h3 className="text-base font-black text-slate-900 dark:text-white">Centro de Incidentes</h3>
               </div>
               <button
                 onClick={() => setIsEmergencyModalOpen(false)}
-                className="p-1 rounded-full hover:bg-slate-800 text-slate-400"
+                className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
               >
                 <Icons.Close />
               </button>
             </div>
 
-            <p className="text-xs text-slate-300">
+            <p className="text-xs text-slate-600 dark:text-slate-300">
               Selecciona el tipo de situación para pausar la orden e informar al cliente y a la central de despacho:
             </p>
 
@@ -785,10 +963,10 @@ export default function ActiveTrip() {
                     alert(`Incidente registrado: "${item.title}". La orden pasará a estado INCIDENT_PAUSED.`);
                     setIsEmergencyModalOpen(false);
                   }}
-                  className="w-full text-left p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition-colors"
+                  className="w-full text-left p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-colors"
                 >
-                  <p className="text-xs font-bold text-white">{item.title}</p>
-                  <p className="text-[11px] text-slate-400">{item.desc}</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">{item.desc}</p>
                 </button>
               ))}
             </div>
@@ -804,7 +982,7 @@ export default function ActiveTrip() {
               </a>
               <button
                 onClick={() => setIsEmergencyModalOpen(false)}
-                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 px-4 rounded-xl text-xs transition-colors"
+                className="flex-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold py-3 px-4 rounded-xl text-xs transition-colors"
               >
                 Volver al Viaje
               </button>
@@ -815,7 +993,7 @@ export default function ActiveTrip() {
 
       {/* ── MODAL: AJUSTES DE COBRO / CUENTA BANCARIA DEL REPARTIDOR ────── */}
       {isBankModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fadeIn transition-colors">
           <div className="w-full max-w-lg my-auto">
             <BankSettingsSection
               userType="driver"

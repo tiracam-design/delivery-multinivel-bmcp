@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { getWebSocketUrl } from '../../../services/api';
+import { getWebSocketUrl, buildApiUrl, getAuthToken } from '../../../services/api';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
@@ -97,22 +97,36 @@ export default function TrackingPage({
   initialOrder = null,
   onBackToMenu = null
 }) {
+  // Helper para recuperar la orden activa persistida o inicial
+  const getActiveOrderData = () => {
+    if (initialOrder) return initialOrder;
+    try {
+      const stored = localStorage.getItem('delivery_active_order');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.warn('Error leyendo delivery_active_order:', e);
+    }
+    return null;
+  };
+
   // ── ESTADOS DEL PEDIDO ───────────────────────────────────────────────────
   const [orderState, setOrderState] = useState(() => {
-    if (initialOrder) {
+    const active = getActiveOrderData();
+    if (active) {
       return {
-        id: initialOrder.id || orderId,
-        status: initialOrder.status || 'EN_CAMINO',
-        deliveryPin: initialOrder.deliveryPin || '4829',
+        id: active.id || orderId,
+        orderNumber: active.orderNumber || '#1048',
+        status: active.status || 'EN_CAMINO',
+        deliveryPin: active.deliveryPin || '4829',
         merchant: {
-          name: initialOrder.pickupAddress ? initialOrder.pickupAddress.split(',')[0] : 'Asadero El Leñador',
-          address: initialOrder.pickupAddress || 'Av. Sucre y Bolívar, Centro Comercial, Tulcán',
+          name: active.restaurantName || (active.pickupAddress ? active.pickupAddress.split(',')[0] : 'Asadero El Leñador'),
+          address: active.restaurantAddress || active.pickupAddress || 'Av. Sucre y Bolívar, Centro Comercial, Tulcán',
           lat: 0.8116,
           lon: -77.7172
         },
         customer: {
-          name: 'Valeria Narváez',
-          address: initialOrder.deliveryAddress || 'Calle Brasil y Av. Tulcanaza, Sector Terminal Terrestre, Tulcán',
+          name: active.customerName || 'Valeria Narváez',
+          address: active.deliveryAddress || 'Calle Brasil y Av. Tulcanaza, Sector Terminal Terrestre, Tulcán',
           lat: 0.8035,
           lon: -77.7245
         },
@@ -125,17 +139,20 @@ export default function TrackingPage({
           deliveries: 1240,
           avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'
         },
-        items: [
-          { name: 'Combo Pollo Asado Completo', qty: 1, price: 11.00 },
-          { name: 'Tarifa Envío Urbano Tulcán', qty: 1, price: 1.50 }
+        items: active.items && active.items.length > 0 ? active.items : [
+          { name: 'Combo Pollo Asado Completo', quantity: 1, price: '11.00' }
         ],
-        totalAmount: initialOrder.totalAmount || 12.50,
+        subtotal: active.subtotal || active.purchasePrice || '11.00',
+        shippingCost: active.shippingCost || active.shippingFee || '1.50',
+        totalAmount: active.totalAmount || '12.50',
+        paymentMethod: active.paymentMethod || 'EFECTIVO',
         currency: '$ USD',
-        createdAt: initialOrder.createdAt || new Date().toISOString()
+        createdAt: active.createdAt || new Date().toISOString()
       };
     }
     return {
       id: orderId,
+      orderNumber: '#1048',
       status: 'EN_CAMINO', // CREADO | EN_PREPARACION | EN_CAMINO | ENTREGADO
       deliveryPin: '4829', // PIN OTP de 4 dígitos generado en el backend
       merchant: {
@@ -159,18 +176,19 @@ export default function TrackingPage({
         deliveries: 1240,
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'
       },
-    etaMinutes: 10,
-    distanceKm: 1.6,
-    currency: '$ USD',
-    subtotal: '11.00',
-    shippingCost: '1.50',
-    totalAmount: '12.50',
-    items: [
-      { name: 'Combo Pollo Asado Familiar + Papas Nativas', quantity: 1, price: '9.50' },
-      { name: 'Gaseosa Tradicional 1.5L', quantity: 1, price: '1.50' }
-    ]
-  };
-});
+      etaMinutes: 10,
+      distanceKm: 1.6,
+      currency: '$ USD',
+      subtotal: '11.00',
+      shippingCost: '1.50',
+      totalAmount: '12.50',
+      paymentMethod: 'EFECTIVO',
+      items: [
+        { name: 'Combo Pollo Asado Familiar + Papas Nativas', quantity: 1, price: '9.50' },
+        { name: 'Gaseosa Tradicional 1.5L', quantity: 1, price: '1.50' }
+      ]
+    };
+  });
 
   // Coordenadas dinámicas del repartidor (actualizadas por WebSocket STOMP)
   const [driverLocation, setDriverLocation] = useState({
@@ -193,7 +211,85 @@ export default function TrackingPage({
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [pinCopied, setPinCopied] = useState(false);
+  const [isRegeneratingPin, setIsRegeneratingPin] = useState(false);
+  const [pinChangeMessage, setPinChangeMessage] = useState(null);
   const [fabOpen, setFabOpen] = useState(false);
+
+  // ── SINCRONIZACIÓN REACTIVA CON EL PEDIDO ACTIVO & BACKEND ───────────────
+  useEffect(() => {
+    const syncActiveOrder = async (orderData) => {
+      const order = orderData || getActiveOrderData();
+      if (!order) return;
+
+      setOrderState((prev) => ({
+        ...prev,
+        id: order.id || prev.id,
+        orderNumber: order.orderNumber || prev.orderNumber,
+        status: order.status || prev.status,
+        deliveryPin: order.deliveryPin || prev.deliveryPin,
+        subtotal: order.subtotal || order.purchasePrice || prev.subtotal,
+        shippingCost: order.shippingCost || order.shippingFee || prev.shippingCost,
+        totalAmount: order.totalAmount || prev.totalAmount,
+        paymentMethod: order.paymentMethod || prev.paymentMethod,
+        items: order.items && order.items.length > 0 ? order.items : prev.items,
+        merchant: {
+          ...prev.merchant,
+          name: order.restaurantName || prev.merchant.name,
+          address: order.restaurantAddress || order.pickupAddress || prev.merchant.address
+        },
+        customer: {
+          ...prev.customer,
+          name: order.customerName || prev.customer.name,
+          address: order.deliveryAddress || prev.customer.address
+        }
+      }));
+
+      // Si el pedido tiene un UUID real, consultar el backend para obtener el estado y PIN más reciente
+      const isUuid = (v) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+      if (order.id && isUuid(order.id)) {
+        try {
+          const token = getAuthToken();
+          const res = await fetch(buildApiUrl(`/v1/orders/${order.id}`), {
+            headers: {
+              'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.deliveryPin) {
+              setOrderState((prev) => ({
+                ...prev,
+                deliveryPin: data.deliveryPin,
+                status: data.status || prev.status,
+                totalAmount: data.totalAmount ? Number(data.totalAmount).toFixed(2) : prev.totalAmount
+              }));
+            }
+          }
+        } catch (e) {
+          console.warn('Backend order sync fallback:', e);
+        }
+      }
+    };
+
+    if (initialOrder) {
+      syncActiveOrder(initialOrder);
+    } else {
+      syncActiveOrder();
+    }
+
+    const onOrderUpdated = (e) => {
+      syncActiveOrder(e?.detail);
+    };
+
+    window.addEventListener('order-updated', onOrderUpdated);
+    window.addEventListener('storage', onOrderUpdated);
+    return () => {
+      window.removeEventListener('order-updated', onOrderUpdated);
+      window.removeEventListener('storage', onOrderUpdated);
+    };
+  }, [initialOrder, orderId]);
 
   // ── ÍNDICE ACTIVO EN EL STEPPER ─────────────────────────────────────────
   const activeStepIndex = useMemo(() => {
@@ -297,6 +393,72 @@ export default function TrackingPage({
     }
   };
 
+  // ── REGENERAR / CAMBIAR CÓDIGO DE VERIFICACIÓN (ANTI-FRAUDE) ─────────────
+  const handleRegeneratePin = async () => {
+    setIsRegeneratingPin(true);
+    setPinChangeMessage(null);
+    let newPin = null;
+
+    try {
+      const token = getAuthToken();
+      const isUuid = (v) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+
+      if (orderState.id && isUuid(orderState.id)) {
+        try {
+          const res = await fetch(buildApiUrl(`/v1/orders/${orderState.id}/regenerate-pin`), {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.deliveryPin) {
+              newPin = data.deliveryPin;
+            }
+          }
+        } catch (err) {
+          console.warn('Backend regenerate-pin unreachable, usando generador local seguro:', err);
+        }
+      }
+
+      // Si no hay respuesta del backend o estamos en offline/demo, generar 4 dígitos seguros distintos
+      if (!newPin) {
+        let candidate = String(Math.floor(1000 + Math.random() * 9000));
+        while (candidate === orderState.deliveryPin) {
+          candidate = String(Math.floor(1000 + Math.random() * 9000));
+        }
+        newPin = candidate;
+      }
+
+      // Actualizar estado reactivo
+      setOrderState((prev) => ({
+        ...prev,
+        deliveryPin: newPin
+      }));
+
+      // Guardar y notificar a la pestaña/módulo del repartidor
+      try {
+        const stored = localStorage.getItem('delivery_active_order');
+        let parsed = stored ? JSON.parse(stored) : {};
+        parsed.deliveryPin = newPin;
+        localStorage.setItem('delivery_active_order', JSON.stringify(parsed));
+        window.dispatchEvent(new CustomEvent('order-updated', { detail: parsed }));
+      } catch (e) {
+        console.warn('Error al sincronizar nuevo PIN en storage:', e);
+      }
+
+      setPinChangeMessage(`¡Código OTP actualizado a ${newPin}! Sincronizado con repartidor.`);
+      setTimeout(() => setPinChangeMessage(null), 3500);
+    } catch (err) {
+      console.error('Error al regenerar PIN:', err);
+    } finally {
+      setIsRegeneratingPin(false);
+    }
+  };
+
   // ── ENVIAR MENSAJE AL CHAT ───────────────────────────────────────────────
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -325,15 +487,15 @@ export default function TrackingPage({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-28 font-sans antialiased">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-200 pb-28 font-sans antialiased">
       {/* ── BARRA SUPERIOR DE NAVEGACIÓN ─────────────────────────────────── */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 py-3 shadow-sm">
+      <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 px-4 py-3 shadow-sm transition-colors">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {onBackToMenu && (
               <button
                 onClick={onBackToMenu}
-                className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1 border border-slate-200 shadow-sm"
+                className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-700 shadow-sm"
               >
                 <span>← Menú</span>
               </button>
@@ -342,10 +504,10 @@ export default function TrackingPage({
               <Icons.Navigation />
             </span>
             <div>
-              <h1 className="text-lg font-extrabold tracking-tight text-slate-900">
+              <h1 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
                 Seguimiento en Vivo
               </h1>
-              <p className="text-xs text-slate-500 font-mono">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                 Orden #{orderState.id ? orderState.id.slice(0, 8) : '4829'}
               </p>
             </div>
@@ -353,14 +515,14 @@ export default function TrackingPage({
 
           {/* Badge de estado en tiempo real */}
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full hidden md:inline-flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-full hidden md:inline-flex items-center gap-1.5">
               <span>🇪🇨</span> Tulcán, Carchi
             </span>
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
             </span>
-            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full hidden sm:inline-block">
+            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 px-2.5 py-1 rounded-full hidden sm:inline-block">
               {wsConnected ? 'WebSocket Activo' : 'GPS Simulado'}
             </span>
           </div>
@@ -371,26 +533,26 @@ export default function TrackingPage({
         {/* ═══════════════════════════════════════════════════════════════════
             REQUISITO 1: ENCABEZADO DINÁMICO CON ESTADO DE LA ORDEN
             ═══════════════════════════════════════════════════════════════════ */}
-        <section className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-100">
+        <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
             <div>
               <span className="text-xs uppercase tracking-wider font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
                 Estado Actual
               </span>
-              <h2 className="text-2xl font-black text-slate-900 mt-2">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-2">
                 {ORDER_STEPS[activeStepIndex]?.label}
               </h2>
-              <p className="text-sm text-slate-500 mt-0.5">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                 {ORDER_STEPS[activeStepIndex]?.sublabel}
               </p>
             </div>
 
             {/* ETA Estimada */}
-            <div className="flex items-center space-x-3 bg-slate-50 border border-slate-200/80 px-4 py-3 rounded-2xl">
+            <div className="flex items-center space-x-3 bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 px-4 py-3 rounded-2xl transition-colors">
               <Icons.Clock />
               <div>
                 <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Llegada estimada</p>
-                <p className="text-xl font-black text-slate-900">
+                <p className="text-xl font-black text-slate-900 dark:text-white">
                   {orderState.etaMinutes} min <span className="text-xs font-medium text-slate-400">({orderState.distanceKm} km)</span>
                 </p>
               </div>
@@ -445,16 +607,16 @@ export default function TrackingPage({
             REQUISITO 2: TARJETA DESTACADA DE SEGURIDAD ANTI-FRAUDE
             "PIN de Entrega con números gigantes en caja bg-yellow-100 border-2 border-yellow-400..."
             ═══════════════════════════════════════════════════════════════════ */}
-        <section className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+        <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
           <div className="flex items-center space-x-3 mb-4">
             <span className="p-2 rounded-xl bg-yellow-50 border border-yellow-200">
               <Icons.ShieldCheck />
             </span>
             <div>
-              <h3 className="text-lg font-black text-slate-900">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">
                 Seguridad Anti-Fraude (BMCP RULE-002)
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Verificación requerida para completar la entrega
               </p>
             </div>
@@ -466,14 +628,32 @@ export default function TrackingPage({
               <span>{orderState.deliveryPin}</span>
             </div>
 
-            <button
-              onClick={copyPinToClipboard}
-              type="button"
-              className="mt-3 inline-flex items-center space-x-1.5 text-xs font-bold text-yellow-900 bg-yellow-200/80 hover:bg-yellow-300 px-3 py-1.5 rounded-lg transition-colors"
-            >
-              <Icons.Lock />
-              <span>{pinCopied ? '¡PIN Copiado!' : 'Copiar PIN'}</span>
-            </button>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+              <button
+                onClick={copyPinToClipboard}
+                type="button"
+                className="inline-flex items-center space-x-1.5 text-xs font-bold text-yellow-900 bg-yellow-200/80 hover:bg-yellow-300 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+              >
+                <Icons.Lock />
+                <span>{pinCopied ? '¡PIN Copiado!' : 'Copiar PIN'}</span>
+              </button>
+
+              <button
+                onClick={handleRegeneratePin}
+                disabled={isRegeneratingPin}
+                type="button"
+                className="inline-flex items-center space-x-1.5 text-xs font-bold text-amber-950 bg-amber-300 hover:bg-amber-400 border border-amber-500 px-3 py-1.5 rounded-lg transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                title="Genera un nuevo código OTP anti-fraude para este pedido"
+              >
+                <span>{isRegeneratingPin ? '⏳ Cambiando...' : '🔄 Cambiar Código de Verificación'}</span>
+              </button>
+            </div>
+
+            {pinChangeMessage && (
+              <div className="mt-2 text-xs font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-300 rounded-lg py-1 px-3 inline-block animate-fadeIn">
+                {pinChangeMessage}
+              </div>
+            )}
           </div>
 
           <div className="mt-4 p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl flex items-start space-x-3">
@@ -488,8 +668,8 @@ export default function TrackingPage({
             REQUISITO 3: COMPONENTE DE MAPA SIMULADO/REAL
             "Movimiento del repartidor en tiempo real consumiendo coordenadas WebSocket"
             ═══════════════════════════════════════════════════════════════════ */}
-        <section className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm">
-          <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <section className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+          <div className="p-4 bg-slate-800 dark:bg-slate-900 text-white flex items-center justify-between transition-colors">
             <div className="flex items-center space-x-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
               <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
@@ -531,20 +711,20 @@ export default function TrackingPage({
 
             {/* Marcador 1: Comercio / Restaurante */}
             <div className="absolute top-[68px] left-[60px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-              <div className="w-10 h-10 rounded-2xl bg-white border-2 border-emerald-500 shadow-lg flex items-center justify-center transform hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-200 border-2 border-emerald-500 shadow-lg flex items-center justify-center transform hover:scale-110 transition-transform">
                 <Icons.Store />
               </div>
-              <span className="mt-1 bg-white/95 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full shadow border border-slate-200 whitespace-nowrap">
+              <span className="mt-1 bg-white/95 dark:bg-slate-800/95 text-slate-800 dark:text-slate-100 text-[10px] font-bold px-2 py-0.5 rounded-full shadow border border-slate-200 dark:border-slate-700 whitespace-nowrap">
                 {orderState.merchant.name}
               </span>
             </div>
 
             {/* Marcador 2: Destino / Cliente */}
             <div className="absolute top-[208px] left-[340px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-              <div className="w-10 h-10 rounded-2xl bg-white border-2 border-indigo-600 shadow-lg flex items-center justify-center transform hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-200 border-2 border-indigo-600 shadow-lg flex items-center justify-center transform hover:scale-110 transition-transform">
                 <Icons.Home />
               </div>
-              <span className="mt-1 bg-white/95 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full shadow border border-slate-200 whitespace-nowrap">
+              <span className="mt-1 bg-white/95 dark:bg-slate-800/95 text-slate-800 dark:text-slate-100 text-[10px] font-bold px-2 py-0.5 rounded-full shadow border border-slate-200 dark:border-slate-700 whitespace-nowrap">
                 Mi Ubicación
               </span>
             </div>
@@ -562,19 +742,19 @@ export default function TrackingPage({
               {/* Onda expansiva de geolocalización activa */}
               <span className="absolute w-14 h-14 rounded-full bg-amber-400 opacity-40 animate-ping"></span>
 
-              <div className="relative w-12 h-12 rounded-2xl bg-slate-900 border-2 border-amber-400 shadow-2xl flex items-center justify-center">
+              <div className="relative w-12 h-12 rounded-2xl bg-slate-900 dark:bg-slate-950 border-2 border-amber-400 shadow-2xl flex items-center justify-center">
                 <Icons.Motorcycle />
               </div>
 
               {/* Tag flotante con telemetría en vivo */}
-              <div className="mt-1.5 bg-slate-900/90 backdrop-blur text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg border border-slate-700 flex items-center space-x-1 whitespace-nowrap">
+              <div className="mt-1.5 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg border border-slate-700 flex items-center space-x-1 whitespace-nowrap">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span>{orderState.driver.name.split(' ')[0]} • {driverLocation.speedKmH} km/h</span>
               </div>
             </div>
 
             {/* Widget flotante de telemetría GPS */}
-            <div className="absolute bottom-4 left-4 right-4 sm:right-auto bg-white/95 backdrop-blur-md border border-slate-200 p-3.5 rounded-2xl shadow-xl flex items-center space-x-4">
+            <div className="absolute bottom-4 left-4 right-4 sm:right-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-700 p-3.5 rounded-2xl shadow-xl flex items-center space-x-4 transition-colors">
               <img
                 src={orderState.driver.avatar}
                 alt={orderState.driver.name}
@@ -582,12 +762,12 @@ export default function TrackingPage({
               />
               <div className="text-left">
                 <div className="flex items-center space-x-1.5">
-                  <span className="font-bold text-sm text-slate-900">{orderState.driver.name}</span>
+                  <span className="font-bold text-sm text-slate-900 dark:text-white">{orderState.driver.name}</span>
                   <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
                     {orderState.driver.level}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500">{orderState.driver.vehicle}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{orderState.driver.vehicle}</p>
                 <div className="flex items-center space-x-1 mt-0.5 text-xs text-amber-500 font-bold">
                   <Icons.Star />
                   <span>{orderState.driver.rating}</span>
@@ -599,7 +779,7 @@ export default function TrackingPage({
         </section>
 
         {/* Resumen del Pedido y Direcciones */}
-        <section className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+        <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
           <h4 className="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-4">
             Detalles de Entrega
           </h4>
@@ -610,8 +790,8 @@ export default function TrackingPage({
               </span>
               <div>
                 <p className="text-xs font-bold text-slate-500">Recogida (Comercio)</p>
-                <p className="text-sm font-semibold text-slate-900">{orderState.merchant.name}</p>
-                <p className="text-xs text-slate-500">{orderState.merchant.address}</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">{orderState.merchant.name}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{orderState.merchant.address}</p>
               </div>
             </div>
 
@@ -621,8 +801,8 @@ export default function TrackingPage({
               </span>
               <div>
                 <p className="text-xs font-bold text-slate-500">Destino (Tu dirección)</p>
-                <p className="text-sm font-semibold text-slate-900">{orderState.customer.name}</p>
-                <p className="text-xs text-slate-500">{orderState.customer.address}</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">{orderState.customer.name}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{orderState.customer.address}</p>
               </div>
             </div>
           </div>
@@ -631,10 +811,10 @@ export default function TrackingPage({
         {/* ═══════════════════════════════════════════════════════════════════
             REQUISITO 1 & 2: RESUMEN DE COSTO ($ USD) — TULCÁN, CARCHI
             ═══════════════════════════════════════════════════════════════════ */}
-        <section className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <h4 className="text-sm font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <h4 className="text-sm font-extrabold uppercase tracking-wider text-slate-800 dark:text-white flex items-center gap-2">
                 <span>Resumen de Costo ($ USD)</span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
                   Dólar Estadounidense
@@ -651,7 +831,7 @@ export default function TrackingPage({
 
           <div className="space-y-3 text-sm">
             {orderState.items.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between text-slate-700">
+              <div key={idx} className="flex items-center justify-between text-slate-700 dark:text-slate-300">
                 <span className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-md bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold font-mono">
                     {item.quantity}x
@@ -662,12 +842,12 @@ export default function TrackingPage({
               </div>
             ))}
 
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-slate-600 text-xs">
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-slate-600 dark:text-slate-400 text-xs">
               <span>Subtotal Productos</span>
               <span className="font-mono font-semibold">${orderState.subtotal} USD</span>
             </div>
 
-            <div className="flex items-center justify-between text-slate-600 text-xs">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 text-xs">
               <span className="flex items-center gap-1.5">
                 <span>Tarifa de Envío Urbana (Tulcán &lt; 3.0 km)</span>
                 <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-200 font-medium">PostGIS</span>
@@ -675,14 +855,14 @@ export default function TrackingPage({
               <span className="font-mono font-semibold">${orderState.shippingCost} USD</span>
             </div>
 
-            <div className="flex items-center justify-between text-slate-600 text-xs">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 text-xs">
               <span>Tarifa de Servicio / Plataforma</span>
               <span className="font-mono font-semibold text-emerald-600">$0.00 USD (Exento)</span>
             </div>
 
-            <div className="pt-3 border-t-2 border-slate-200 flex items-center justify-between text-base">
+            <div className="pt-3 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-between text-base">
               <div>
-                <span className="font-black text-slate-900 block">Total a Pagar</span>
+                <span className="font-black text-slate-900 dark:text-white block">Total a Pagar</span>
                 <span className="text-[11px] text-slate-400 font-medium">Pago en Efectivo / DeUna / Banco Pichincha</span>
               </div>
               <div className="text-right">
@@ -731,7 +911,7 @@ export default function TrackingPage({
           onClick={() => setFabOpen(!fabOpen)}
           type="button"
           aria-label="Contactar repartidor"
-          className="w-14 h-14 rounded-full bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-center shadow-2xl ring-4 ring-slate-200 transition-all transform hover:scale-105 active:scale-95"
+          className="w-14 h-14 rounded-full bg-slate-800 dark:bg-slate-900 hover:bg-slate-700 dark:hover:bg-slate-800 text-white flex items-center justify-center shadow-2xl ring-4 ring-slate-200 dark:ring-slate-700 transition-colors transform hover:scale-105 active:scale-95"
         >
           {fabOpen ? (
             <Icons.Close />
@@ -746,10 +926,10 @@ export default function TrackingPage({
 
       {/* ── MODAL DE CHAT EN TIEMPO REAL ──────────────────────────────────── */}
       {showChatModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-0 sm:p-4 animate-fade-in">
-          <div className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col h-[520px] overflow-hidden border border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 dark:bg-slate-900/60 backdrop-blur-sm p-0 sm:p-4 animate-fade-in">
+          <div className="w-full sm:max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col h-[520px] overflow-hidden border border-slate-200 dark:border-slate-700 transition-colors">
             {/* Header del Chat */}
-            <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+            <div className="p-4 bg-slate-800 dark:bg-slate-950 text-white flex items-center justify-between transition-colors">
               <div className="flex items-center space-x-3">
                 <img
                   src={orderState.driver.avatar}
@@ -773,7 +953,7 @@ export default function TrackingPage({
             </div>
 
             {/* Historial de Mensajes */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50">
+            <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 dark:bg-slate-800">
               {chatMessages.map((msg, i) => {
                 const isClient = msg.sender === 'client';
                 return (
@@ -784,8 +964,8 @@ export default function TrackingPage({
                     <div
                       className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-medium leading-relaxed ${
                         isClient
-                          ? 'bg-slate-900 text-white rounded-br-xs'
-                          : 'bg-white text-slate-800 border border-slate-200 rounded-bl-xs shadow-sm'
+                          ? 'bg-slate-700 dark:bg-slate-900 text-white rounded-br-xs'
+                          : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-bl-xs shadow-sm'
                       }`}
                     >
                       {msg.text}
@@ -797,7 +977,7 @@ export default function TrackingPage({
             </div>
 
             {/* Input para redactar mensaje */}
-            <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-slate-200 flex items-center space-x-2">
+            <form onSubmit={handleSendMessage} className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 flex items-center space-x-2 transition-colors">
               <input
                 type="text"
                 value={inputMessage}
@@ -807,7 +987,7 @@ export default function TrackingPage({
               />
               <button
                 type="submit"
-                className="p-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition-colors"
+                className="p-2.5 bg-slate-700 dark:bg-slate-900 hover:bg-slate-600 dark:hover:bg-slate-800 text-white rounded-xl transition-colors"
               >
                 <Icons.Send />
               </button>

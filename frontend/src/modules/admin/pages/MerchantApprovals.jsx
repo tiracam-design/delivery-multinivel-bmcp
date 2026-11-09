@@ -613,28 +613,28 @@ export default function MerchantApprovals() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-4 md:p-8 font-sans transition-colors duration-200">
       {/* ── NOTIFICACIÓN TOAST FLOTANTE ─────────────────────────────────────── */}
       {toast && (
-        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl transition-all duration-300 animate-bounce bg-white border border-slate-200">
+        <div className="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl transition-all duration-300 animate-bounce bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
           {toast.type === 'success' ? (
-            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <Icons.CheckCircle />
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 flex items-center justify-center shrink-0">
               <Icons.AlertTriangle />
             </div>
           )}
           <div>
-            <p className="text-sm font-semibold text-slate-900">
+            <p className="text-sm font-semibold text-slate-900 dark:text-white">
               {toast.type === 'success' ? 'Operación Exitosa' : 'Solicitud Notificada'}
             </p>
-            <p className="text-xs text-slate-600 max-w-sm">{toast.message}</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm">{toast.message}</p>
           </div>
           <button
             onClick={() => setToast(null)}
-            className="text-slate-400 hover:text-slate-600 p-1 ml-2"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 ml-2"
           >
             <Icons.XMark />
           </button>
@@ -645,17 +645,17 @@ export default function MerchantApprovals() {
       <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Panel de Cumplimiento Legal & Onboarding
             </span>
-            <span className="text-xs text-slate-500 font-medium">Módulo BMCP Admin</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Módulo BMCP Admin</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
             Aprobación de Comercios & Repartidores
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Valida antecedentes, Fichas RUC de SUNAT, Licencias de Conducir B-IIc y pólizas SOAT
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Valida antecedentes, Fichas RUC de SRI Ecuador, Licencias de Conducir y pólizas SPPAT
             para autorizar el ingreso a la plataforma de delivery.
           </p>
         </div>
@@ -667,13 +667,13 @@ export default function MerchantApprovals() {
               setApplications(INITIAL_APPLICATIONS);
               showToast('Lista de solicitudes sincronizada con el backend', 'success');
             }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium shadow-sm transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium shadow-sm transition"
             title="Refrescar solicitudes"
           >
             <Icons.Refresh />
             <span>Actualizar</span>
           </button>
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold shadow-md">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-slate-800 text-white rounded-lg text-sm font-semibold shadow-md border border-slate-800 dark:border-slate-700">
             <Icons.ShieldCheck />
             <span>Filtro Anti-Fraude Activo</span>
           </div>
@@ -683,84 +683,84 @@ export default function MerchantApprovals() {
       {/* ── REQUISITO 4: INDICADORES SUPERIORES DE FLOTA ───────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         {/* KPI 1: Total Comercios Activos */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full pointer-events-none -mr-4 -mt-4 opacity-70"></div>
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 dark:bg-emerald-950/20 rounded-bl-full pointer-events-none -mr-4 -mt-4 opacity-70"></div>
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Total Comercios Activos
             </span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
               <Icons.Store />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-slate-900">
+            <span className="text-3xl font-black text-slate-900 dark:text-white">
               {fleetKpis.activeMerchants}
             </span>
-            <span className="text-xs font-semibold text-emerald-600 inline-flex items-center gap-0.5">
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-0.5">
               <Icons.TrendingUp />
               {fleetKpis.activeMerchantsGrowth}
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-2 flex items-center gap-1.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
             Restaurantes, farmacias y bodegas operativas
           </p>
         </div>
 
         {/* KPI 2: Repartidores en Línea */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-sky-50 rounded-bl-full pointer-events-none -mr-4 -mt-4 opacity-70"></div>
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-sky-50 dark:bg-sky-950/20 rounded-bl-full pointer-events-none -mr-4 -mt-4 opacity-70"></div>
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Repartidores en Línea
             </span>
-            <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 flex items-center justify-center">
               <Icons.Motorcycle />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-slate-900">
+            <span className="text-3xl font-black text-slate-900 dark:text-white">
               {fleetKpis.onlineDrivers}
             </span>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-sky-50 text-sky-700">
+            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300">
               Flota Activa
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-2 flex items-center gap-1.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
             {fleetKpis.onlineDriversRoute}
           </p>
         </div>
 
         {/* KPI 3: Pedidos en Curso */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-bl-full pointer-events-none -mr-4 -mt-4 opacity-70"></div>
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-50 dark:bg-amber-950/20 rounded-bl-full pointer-events-none -mr-4 -mt-4 opacity-70"></div>
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Pedidos en Curso
             </span>
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center">
               <Icons.ShoppingBag />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-slate-900">
+            <span className="text-3xl font-black text-slate-900 dark:text-white">
               {fleetKpis.ordersInProgress}
             </span>
-            <span className="text-xs font-semibold text-amber-700 inline-flex items-center gap-1">
+            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 inline-flex items-center gap-1">
               <Icons.Clock />
               En tránsito
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-2 flex items-center gap-1.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-amber-500"></span>
             {fleetKpis.ordersAverageTime}
           </p>
         </div>
 
         {/* KPI 4: Solicitudes Pendientes (Acción Inmediata) */}
-        <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+        <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden border border-indigo-800/40">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-indigo-200">
               Cola de Aprobaciones
@@ -785,15 +785,15 @@ export default function MerchantApprovals() {
       </div>
 
       {/* ── BARRA DE BÚSQUEDA Y PESTAÑAS DE FILTRO ─────────────────────────── */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 mb-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition-colors">
         {/* Pestañas de tipo */}
-        <div className="flex items-center p-1 bg-slate-100 rounded-lg">
+        <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
           <button
             onClick={() => setActiveTab('ALL')}
             className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition ${
               activeTab === 'ALL'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Todas las Solicitudes ({applications.length})
@@ -802,8 +802,8 @@ export default function MerchantApprovals() {
             onClick={() => setActiveTab('MERCHANT')}
             className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition inline-flex items-center gap-1.5 ${
               activeTab === 'MERCHANT'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -813,8 +813,8 @@ export default function MerchantApprovals() {
             onClick={() => setActiveTab('DRIVER')}
             className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition inline-flex items-center gap-1.5 ${
               activeTab === 'DRIVER'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-sky-500"></span>
@@ -833,12 +833,12 @@ export default function MerchantApprovals() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por RUC, Licencia, Nombre o Giro..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs md:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-800 transition"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <Icons.XMark />
               </button>
@@ -848,7 +848,7 @@ export default function MerchantApprovals() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs md:text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs md:text-sm font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="PENDING">Estado: Pendientes</option>
             <option value="APPROVED">Estado: Aprobados</option>
@@ -859,60 +859,59 @@ export default function MerchantApprovals() {
       </div>
 
       {/* ── REQUISITO 1: TABLA MODERNA CON CLASES TAILWIND CSS ─────────────── */}
-      {/* Clase solicitada: min-w-full divide-y divide-gray-200 shadow-lg rounded-xl overflow-hidden */}
-      <div className="shadow-lg rounded-xl overflow-hidden border border-gray-200 bg-white">
+      <div className="shadow-lg rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-slate-50/80">
+          <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+            <thead className="bg-slate-50/80 dark:bg-slate-800/80">
               <tr>
                 <th
                   scope="col"
-                  className="px-6 py-3.5 text-left text-xs font-bold text-slate-600 uppercase tracking-wider"
+                  className="px-6 py-3.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Entidad / Solicitante
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3.5 text-left text-xs font-bold text-slate-600 uppercase tracking-wider"
+                  className="px-6 py-3.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Tipo & Categoría
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3.5 text-left text-xs font-bold text-slate-600 uppercase tracking-wider"
+                  className="px-6 py-3.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Identificación Legal (RUC / Licencia)
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3.5 text-left text-xs font-bold text-slate-600 uppercase tracking-wider"
+                  className="px-6 py-3.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Ubicación & Contacto
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3.5 text-left text-xs font-bold text-slate-600 uppercase tracking-wider"
+                  className="px-6 py-3.5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Estado
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3.5 text-right text-xs font-bold text-slate-600 uppercase tracking-wider"
+                  className="px-6 py-3.5 text-right text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
                 >
                   Acciones Rápidas
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200 text-sm">
+            <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-800 text-sm">
               {filteredApplications.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan="6" className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                     <div className="max-w-sm mx-auto flex flex-col items-center">
-                      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+                      <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
                         <Icons.Search />
                       </div>
-                      <p className="font-semibold text-slate-700">No se encontraron solicitudes</p>
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="font-semibold text-slate-700 dark:text-slate-200">No se encontraron solicitudes</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         Intenta ajustar el término de búsqueda o selecciona otro filtro de estado.
                       </p>
                       <button
@@ -921,7 +920,7 @@ export default function MerchantApprovals() {
                           setStatusFilter('ALL');
                           setActiveTab('ALL');
                         }}
-                        className="mt-4 px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                        className="mt-4 px-3 py-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800"
                       >
                         Limpiar todos los filtros
                       </button>
@@ -932,7 +931,7 @@ export default function MerchantApprovals() {
                 filteredApplications.map((app) => (
                   <tr
                     key={app.id}
-                    className="hover:bg-slate-50/70 transition-colors duration-150"
+                    className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors duration-150"
                   >
                     {/* Columna 1: Solicitante */}
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -940,20 +939,20 @@ export default function MerchantApprovals() {
                         <div
                           className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-sm ${
                             app.type === 'MERCHANT'
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-sky-50 text-sky-700 border border-sky-200'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40'
+                              : 'bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/40'
                           }`}
                         >
                           {app.type === 'MERCHANT' ? <Icons.Store /> : <Icons.Motorcycle />}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 flex items-center gap-2">
+                          <div className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
                             <span>{app.businessName}</span>
-                            <span className="text-[11px] font-mono font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                            <span className="text-[11px] font-mono font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                               {app.id}
                             </span>
                           </div>
-                          <div className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
+                          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
                             <span>Titular: {app.applicantName}</span>
                           </div>
                         </div>
@@ -964,17 +963,17 @@ export default function MerchantApprovals() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         {app.type === 'MERCHANT' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-800">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400"></span>
                             Comercio Afiliado
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-100 text-sky-800">
-                            <span className="w-1.5 h-1.5 rounded-full bg-sky-600"></span>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800/40">
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-600 dark:bg-sky-400"></span>
                             Repartidor BMCP
                           </span>
                         )}
-                        <p className="text-xs text-slate-600 mt-1 font-medium">{app.category}</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">{app.category}</p>
                         {app.vehicleInfo && (
                           <p className="text-[11px] text-slate-400 font-mono mt-0.5">
                             {app.vehicleInfo}
@@ -986,13 +985,13 @@ export default function MerchantApprovals() {
                     {/* Columna 3: Documento Legal (RUC / Licencia) */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="flex items-center gap-1.5 font-mono font-bold text-xs text-slate-900">
-                          <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-sans font-semibold">
+                        <div className="flex items-center gap-1.5 font-mono font-bold text-xs text-slate-900 dark:text-white">
+                          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-sans font-semibold border border-slate-200 dark:border-slate-700">
                             {app.documentType}
                           </span>
                           <span>{app.documentNumber}</span>
                         </div>
-                        <div className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                           <span className="text-[11px]">
                             {app.documents.length} documentos adjuntos
@@ -1004,8 +1003,8 @@ export default function MerchantApprovals() {
                     {/* Columna 4: Ubicación & Contacto */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-xs">
-                        <p className="font-semibold text-slate-800">{app.zone}</p>
-                        <p className="text-slate-500 mt-0.5">{app.phone}</p>
+                        <p className="font-semibold text-slate-800 dark:text-slate-200">{app.zone}</p>
+                        <p className="text-slate-500 dark:text-slate-400 mt-0.5">{app.phone}</p>
                         <p className="text-slate-400 text-[11px] truncate max-w-[180px]">
                           {app.email}
                         </p>
@@ -1014,24 +1013,23 @@ export default function MerchantApprovals() {
 
                     {/* Columna 5: Estado con Badge Tailwind */}
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {/* REQUISITO 2: Badge de solicitudes pendientes: bg-yellow-100 text-yellow-800 rounded-full px-3 py-1 */}
                       {app.status === 'PENDING' && (
-                        <span className="bg-yellow-100 text-yellow-800 rounded-full px-3 py-1 text-xs font-semibold inline-flex items-center gap-1.5 border border-yellow-200">
+                        <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-full px-3 py-1 text-xs font-semibold inline-flex items-center gap-1.5 border border-yellow-200 dark:border-yellow-700/50">
                           <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
                           Pendiente de Validación
                         </span>
                       )}
 
                       {app.status === 'APPROVED' && (
-                        <span className="bg-emerald-100 text-emerald-800 rounded-full px-3 py-1 text-xs font-semibold inline-flex items-center gap-1.5 border border-emerald-200">
-                          <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                        <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 rounded-full px-3 py-1 text-xs font-semibold inline-flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-700/50">
+                          <span className="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400"></span>
                           Aprobado & Activo
                         </span>
                       )}
 
                       {app.status === 'REJECTED' && (
-                        <span className="bg-rose-100 text-rose-800 rounded-full px-3 py-1 text-xs font-semibold inline-flex items-center gap-1.5 border border-rose-200">
-                          <span className="w-2 h-2 rounded-full bg-rose-600"></span>
+                        <span className="bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-300 rounded-full px-3 py-1 text-xs font-semibold inline-flex items-center gap-1.5 border border-rose-200 dark:border-rose-700/50">
+                          <span className="w-2 h-2 rounded-full bg-rose-600 dark:bg-rose-400"></span>
                           Rechazado
                         </span>
                       )}
@@ -1044,17 +1042,15 @@ export default function MerchantApprovals() {
                         <button
                           type="button"
                           onClick={() => handleOpenDocumentsModal(app)}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg shadow-sm transition hover:text-slate-900"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-lg shadow-sm transition hover:text-slate-900 dark:hover:text-white"
                           title="Ver documentos oficiales del solicitante"
                         >
                           <Icons.Eye />
                           <span>Ver Documentos {app.type === 'MERCHANT' ? 'RUC' : 'Licencia'}</span>
                         </button>
 
-                        {/* REQUISITO 3: Botones Aprobar y Rechazar */}
                         {app.status === 'PENDING' ? (
                           <>
-                            {/* Botón Aprobar: bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg */}
                             <button
                               type="button"
                               onClick={() => handleApprove(app.id)}
@@ -1064,7 +1060,6 @@ export default function MerchantApprovals() {
                               <span>Aprobar</span>
                             </button>
 
-                            {/* Botón Rechazar: bg-rose-600 text-white */}
                             <button
                               type="button"
                               onClick={() => handleOpenRejectModal(app)}
@@ -1078,7 +1073,6 @@ export default function MerchantApprovals() {
                           <button
                             type="button"
                             onClick={() => {
-                              // Permite restaurar o re-evaluar si ya no está en pendiente
                               setApplications((prev) =>
                                 prev.map((item) =>
                                   item.id === app.id ? { ...item, status: 'PENDING' } : item
@@ -1086,7 +1080,7 @@ export default function MerchantApprovals() {
                               );
                               showToast(`Solicitud ${app.id} devuelta a estado Pendiente`, 'success');
                             }}
-                            className="text-xs text-slate-500 hover:text-slate-700 underline px-2 py-1"
+                            className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 underline px-2 py-1"
                           >
                             Reevaluar
                           </button>
@@ -1101,10 +1095,10 @@ export default function MerchantApprovals() {
         </div>
 
         {/* Footer de la tabla con resumen de registros */}
-        <div className="bg-slate-50 px-6 py-3 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+        <div className="bg-slate-50 dark:bg-slate-800/60 px-6 py-3 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
           <div>
-            Mostrando <span className="font-bold text-slate-800">{filteredApplications.length}</span>{' '}
-            de <span className="font-bold text-slate-800">{applications.length}</span> solicitudes
+            Mostrando <span className="font-bold text-slate-800 dark:text-slate-200">{filteredApplications.length}</span>{' '}
+            de <span className="font-bold text-slate-800 dark:text-slate-200">{applications.length}</span> solicitudes
             registradas
           </div>
           <div className="flex items-center gap-4">
@@ -1126,16 +1120,16 @@ export default function MerchantApprovals() {
 
       {/* ── MODAL: VER DOCUMENTOS RUC / LICENCIA ───────────────────────────── */}
       {selectedApplication && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-200">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800 transition-colors">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-800/80">
               <div className="flex items-center gap-3">
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base shrink-0 ${
                     selectedApplication.type === 'MERCHANT'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-sky-100 text-sky-800'
+                      ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                      : 'bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300'
                   }`}
                 >
                   {selectedApplication.type === 'MERCHANT' ? (
@@ -1146,14 +1140,14 @@ export default function MerchantApprovals() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-bold text-slate-900">
+                    <h2 className="text-base font-bold text-slate-900 dark:text-white">
                       Verificación Documentaria: {selectedApplication.businessName}
                     </h2>
-                    <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700">
+                    <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
                       {selectedApplication.documentType} {selectedApplication.documentNumber}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Solicitante: {selectedApplication.applicantName} • {selectedApplication.zone}
                   </p>
                 </div>
@@ -1161,7 +1155,7 @@ export default function MerchantApprovals() {
               <button
                 type="button"
                 onClick={() => setSelectedApplication(null)}
-                className="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-200/60 transition"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-800 transition"
               >
                 <Icons.XMark />
               </button>
@@ -1171,7 +1165,7 @@ export default function MerchantApprovals() {
             <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-12 gap-6">
               {/* Panel Izquierdo: Lista de documentos */}
               <div className="md:col-span-5 flex flex-col gap-3">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
                   Documentos Legales Obligatorios ({selectedApplication.documents.length})
                 </p>
 
@@ -1181,41 +1175,41 @@ export default function MerchantApprovals() {
                     onClick={() => setSelectedDocumentIndex(idx)}
                     className={`p-3.5 rounded-xl border text-left cursor-pointer transition flex items-start gap-3 ${
                       selectedDocumentIndex === idx
-                        ? 'bg-indigo-50/70 border-indigo-400 ring-1 ring-indigo-400 shadow-sm'
-                        : 'bg-white border-slate-200 hover:bg-slate-50'
+                        ? 'bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-400 dark:border-indigo-500 ring-1 ring-indigo-400 shadow-sm'
+                        : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/60'
                     }`}
                   >
                     <div
                       className={`p-2 rounded-lg mt-0.5 shrink-0 ${
                         selectedDocumentIndex === idx
                           ? 'bg-indigo-600 text-white'
-                          : 'bg-slate-100 text-slate-600'
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                       }`}
                     >
                       <Icons.FileText />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold text-slate-900 truncate">{doc.name}</p>
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                        <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{doc.name}</p>
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
                           {doc.status}
                         </span>
                       </div>
-                      <p className="text-[11px] font-mono text-slate-500 truncate mt-0.5">
+                      <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate mt-0.5">
                         {doc.code}
                       </p>
-                      <p className="text-[11px] text-slate-600 mt-1 line-clamp-2">{doc.notes}</p>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 line-clamp-2">{doc.notes}</p>
                     </div>
                   </div>
                 ))}
 
                 {/* Resumen de auditoría */}
-                <div className="mt-auto bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-xs">
-                  <div className="flex items-center gap-2 text-slate-700 font-semibold mb-1">
+                <div className="mt-auto bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 p-3.5 rounded-xl text-xs">
+                  <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold mb-1">
                     <Icons.ShieldCheck />
                     <span>Verificación Automatizada SRI / ANT</span>
                   </div>
-                  <p className="text-slate-500 text-[11px]">
+                  <p className="text-slate-500 dark:text-slate-400 text-[11px]">
                     Los datos tributarios (SRI) y vehiculares (ANT / SPPAT) fueron validados contra los registros oficiales de la República del Ecuador.
                     Se validó el estándar de 13 dígitos para RUC y vigencia en la provincia del Carchi (04).
                   </p>
@@ -1223,15 +1217,15 @@ export default function MerchantApprovals() {
               </div>
 
               {/* Panel Derecho: Visor del Documento seleccionado */}
-              <div className="md:col-span-7 bg-slate-100/70 rounded-xl border border-slate-200 p-5 flex flex-col">
+              <div className="md:col-span-7 bg-slate-100/70 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 p-5 flex flex-col">
                 {selectedApplication.documents[selectedDocumentIndex] && (
                   <div className="flex-1 flex flex-col">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700 mb-4">
                       <div>
-                        <h3 className="text-sm font-bold text-slate-900">
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                           {selectedApplication.documents[selectedDocumentIndex].name}
                         </h3>
-                        <p className="text-xs text-slate-500 font-mono">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                           Archivo: {selectedApplication.documents[selectedDocumentIndex].code}
                         </p>
                       </div>
@@ -1242,7 +1236,7 @@ export default function MerchantApprovals() {
                             'success'
                           )
                         }
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm"
                       >
                         <Icons.Download />
                         <span>Descargar PDF</span>
@@ -1250,7 +1244,7 @@ export default function MerchantApprovals() {
                     </div>
 
                     {/* Previsualización gráfica simulada del documento oficial */}
-                    <div className="flex-1 bg-white rounded-xl border border-slate-300 p-5 shadow-inner flex flex-col justify-between">
+                    <div className="flex-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-300 dark:border-slate-700 p-5 shadow-inner flex flex-col justify-between">
                       {/* Caso: Ficha RUC (SRI Ecuador) */}
                       {selectedApplication.documents[selectedDocumentIndex].previewType ===
                         'ruc' && (() => {
@@ -1259,16 +1253,16 @@ export default function MerchantApprovals() {
 
                         return (
                           <div className="space-y-4">
-                            <div className="flex items-center justify-between border-b pb-3">
+                            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                               <div>
-                                <span className="text-xs font-extrabold text-blue-900 tracking-wider">
+                                <span className="text-xs font-extrabold text-blue-900 dark:text-blue-400 tracking-wider">
                                   SRI — SERVICIO DE RENTAS INTERNAS (REPÚBLICA DEL ECUADOR)
                                 </span>
-                                <h4 className="text-sm font-black text-slate-900 mt-1">
+                                <h4 className="text-sm font-black text-slate-900 dark:text-white mt-1">
                                   CERTIFICADO DE REGISTRO ÚNICO DE CONTRIBUYENTES (RUC)
                                 </h4>
                               </div>
-                              <span className="text-xs font-mono font-bold bg-blue-100 text-blue-900 px-2 py-1 rounded">
+                              <span className="text-xs font-mono font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300 px-2 py-1 rounded">
                                 OFICIAL SRI
                               </span>
                             </div>
@@ -1276,8 +1270,8 @@ export default function MerchantApprovals() {
                             {/* Badge interactivo de validación de 13 dígitos */}
                             <div className={`p-3 rounded-xl border text-xs font-medium flex items-center justify-between ${
                               validation.isValid
-                                ? 'bg-emerald-50/80 border-emerald-300 text-emerald-900'
-                                : 'bg-rose-50/80 border-rose-300 text-rose-900'
+                                ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-300'
+                                : 'bg-rose-50/80 dark:bg-rose-950/40 border-rose-300 dark:border-rose-700 text-rose-900 dark:text-rose-300'
                             }`}>
                               <div className="flex items-center gap-2">
                                 <span className="text-base">{validation.isValid ? '✅' : '❌'}</span>
@@ -1285,14 +1279,14 @@ export default function MerchantApprovals() {
                                   <p className="font-bold">
                                     {validation.isValid ? 'Validación Fiscal SRI Aprobada' : 'Observación en Validación Fiscal'}
                                   </p>
-                                  <p className="text-[11px] text-slate-600">
+                                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
                                     {validation.isValid
                                       ? `Estándar 13 dígitos cumplido • ${validation.province} • Tipo: ${validation.type}`
                                       : validation.reason}
                                   </p>
                                 </div>
                               </div>
-                              <span className="font-mono text-[10px] font-bold uppercase px-2 py-1 bg-white rounded border border-slate-200">
+                              <span className="font-mono text-[10px] font-bold uppercase px-2 py-1 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
                                 SRI 13-DIGITS
                               </span>
                             </div>
@@ -1302,7 +1296,7 @@ export default function MerchantApprovals() {
                                 <span className="text-slate-400 block text-[10px] uppercase font-bold">
                                   Número de RUC (13 dígitos)
                                 </span>
-                                <span className="font-mono font-bold text-slate-900 text-sm">
+                                <span className="font-mono font-bold text-slate-900 dark:text-white text-sm">
                                   {rucNumber}
                                 </span>
                               </div>
@@ -1310,7 +1304,7 @@ export default function MerchantApprovals() {
                                 <span className="text-slate-400 block text-[10px] uppercase font-bold">
                                   Estado Tributario
                                 </span>
-                                <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                                <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
                                   ACTIVO / AL DÍA
                                 </span>
                               </div>
@@ -1318,7 +1312,7 @@ export default function MerchantApprovals() {
                                 <span className="text-slate-400 block text-[10px] uppercase font-bold">
                                   Razón Social / Nombre Comercial
                                 </span>
-                                <span className="font-semibold text-slate-900">
+                                <span className="font-semibold text-slate-900 dark:text-white">
                                   {selectedApplication.documents[selectedDocumentIndex].details
                                     ?.legalName || selectedApplication.businessName}
                                 </span>
@@ -1327,7 +1321,7 @@ export default function MerchantApprovals() {
                                 <span className="text-slate-400 block text-[10px] uppercase font-bold">
                                   Régimen Tributario
                                 </span>
-                                <span className="font-medium text-slate-800">
+                                <span className="font-medium text-slate-800 dark:text-slate-200">
                                   {selectedApplication.documents[selectedDocumentIndex].details
                                     ?.regime || 'Régimen General'}
                                 </span>
@@ -1336,7 +1330,7 @@ export default function MerchantApprovals() {
                                 <span className="text-slate-400 block text-[10px] uppercase font-bold">
                                   Jurisdicción Provincial
                                 </span>
-                                <span className="font-medium text-indigo-700">
+                                <span className="font-medium text-indigo-700 dark:text-indigo-400">
                                   Carchi (Código 04) - Tulcán
                                 </span>
                               </div>
@@ -1344,7 +1338,7 @@ export default function MerchantApprovals() {
                                 <span className="text-slate-400 block text-[10px] uppercase font-bold">
                                   Domicilio Fiscal Registrado
                                 </span>
-                                <span className="text-slate-800">
+                                <span className="text-slate-800 dark:text-slate-200">
                                   {selectedApplication.documents[selectedDocumentIndex].details
                                     ?.address || 'Tulcán, Carchi, Ecuador'}
                                 </span>
@@ -1358,16 +1352,16 @@ export default function MerchantApprovals() {
                       {selectedApplication.documents[selectedDocumentIndex].previewType ===
                         'driver_license' && (
                         <div className="space-y-4">
-                          <div className="flex items-center justify-between border-b pb-3">
+                          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                             <div>
-                              <span className="text-xs font-extrabold text-red-800 tracking-wider">
+                              <span className="text-xs font-extrabold text-red-800 dark:text-red-400 tracking-wider">
                                 REPÚBLICA DEL ECUADOR — AGENCIA NACIONAL DE TRÁNSITO (ANT)
                               </span>
-                              <h4 className="text-sm font-black text-slate-900 mt-1">
+                              <h4 className="text-sm font-black text-slate-900 dark:text-white mt-1">
                                 LICENCIA DE CONDUCIR PROFESIONAL / TIPO A (MOTOCICLETAS)
                               </h4>
                             </div>
-                            <span className="text-xs font-mono font-bold bg-red-100 text-red-900 px-2 py-1 rounded">
+                            <span className="text-xs font-mono font-bold bg-red-100 dark:bg-red-950/60 text-red-900 dark:text-red-300 px-2 py-1 rounded">
                               TIPO A
                             </span>
                           </div>
@@ -1377,7 +1371,7 @@ export default function MerchantApprovals() {
                               <span className="text-slate-400 block text-[10px] uppercase font-bold">
                                 Conductor / Titular
                               </span>
-                              <span className="font-bold text-slate-900">
+                              <span className="font-bold text-slate-900 dark:text-white">
                                 {selectedApplication.applicantName}
                               </span>
                             </div>
@@ -1385,7 +1379,7 @@ export default function MerchantApprovals() {
                               <span className="text-slate-400 block text-[10px] uppercase font-bold">
                                 Categoría Habilitada
                               </span>
-                              <span className="font-mono font-bold text-indigo-700">
+                              <span className="font-mono font-bold text-indigo-700 dark:text-indigo-400">
                                 TIPO A (Motos y similares)
                               </span>
                             </div>
@@ -1393,7 +1387,7 @@ export default function MerchantApprovals() {
                               <span className="text-slate-400 block text-[10px] uppercase font-bold">
                                 Fecha de Vencimiento
                               </span>
-                              <span className="font-semibold text-slate-800">
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">
                                 {selectedApplication.documents[selectedDocumentIndex].expiryDate ||
                                   '2029-03-15'}
                               </span>
@@ -1402,7 +1396,7 @@ export default function MerchantApprovals() {
                               <span className="text-slate-400 block text-[10px] uppercase font-bold">
                                 Récord de Puntos ANT
                               </span>
-                              <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                              <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
                                 {selectedApplication.documents[selectedDocumentIndex].details?.pointsRemaining || '30 / 30 PUNTOS'}
                               </span>
                             </div>
@@ -1410,7 +1404,7 @@ export default function MerchantApprovals() {
                               <span className="text-slate-400 block text-[10px] uppercase font-bold">
                                 Cobertura Seguro Vial Obligatorio
                               </span>
-                              <span className="text-slate-700 font-medium">
+                              <span className="text-slate-700 dark:text-slate-300 font-medium">
                                 Certificado SPPAT Vigente (Sistema Público para Pago de Accidentes de Tránsito)
                               </span>
                             </div>
@@ -1424,25 +1418,25 @@ export default function MerchantApprovals() {
                         selectedApplication.documents[selectedDocumentIndex].previewType !==
                           'driver_license' && (
                           <div className="space-y-4">
-                            <div className="flex items-center justify-between border-b pb-3">
-                              <h4 className="text-sm font-bold text-slate-900">
+                            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
                                 {selectedApplication.documents[selectedDocumentIndex].name}
                               </h4>
-                              <span className="text-xs font-mono font-bold bg-slate-100 text-slate-700 px-2 py-1 rounded">
+                              <span className="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 rounded">
                                 DIGITAL CERTIFIED
                               </span>
                             </div>
-                            <div className="p-4 bg-slate-50 rounded-lg text-xs space-y-2 border border-slate-200">
-                              <p className="font-semibold text-slate-800">
+                            <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-lg text-xs space-y-2 border border-slate-200 dark:border-slate-700">
+                              <p className="font-semibold text-slate-800 dark:text-slate-200">
                                 {selectedApplication.documents[selectedDocumentIndex].notes}
                               </p>
-                              <p className="text-slate-500">
+                              <p className="text-slate-500 dark:text-slate-400">
                                 Fecha de Emisión:{' '}
                                 {selectedApplication.documents[selectedDocumentIndex].issueDate}
                               </p>
-                              <p className="text-slate-500">
+                              <p className="text-slate-500 dark:text-slate-400">
                                 Código de Verificación Hash:{' '}
-                                <span className="font-mono text-[10px] text-slate-700">
+                                <span className="font-mono text-[10px] text-slate-700 dark:text-slate-300">
                                   SHA256:7f9a88c3120...918bca
                                 </span>
                               </p>
@@ -1451,8 +1445,8 @@ export default function MerchantApprovals() {
                         )}
 
                       {/* Sello de verificación al pie */}
-                      <div className="mt-6 pt-4 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
-                        <span className="flex items-center gap-1.5 font-medium text-emerald-600">
+                      <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                        <span className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
                           <Icons.CheckCircle />
                           Firma digital y sellos validados contra entidad emisora
                         </span>
@@ -1465,11 +1459,11 @@ export default function MerchantApprovals() {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => setSelectedApplication(null)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
               >
                 Cerrar Visor
               </button>
@@ -1500,10 +1494,10 @@ export default function MerchantApprovals() {
 
       {/* ── MODAL: MOTIVO DE RECHAZO ────────────────────────────────────────── */}
       {rejectingApplication && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
-            <div className="px-6 py-4 bg-rose-50 border-b border-rose-100 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-rose-800">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 dark:border-slate-800 transition-colors">
+            <div className="px-6 py-4 bg-rose-50 dark:bg-rose-950/40 border-b border-rose-100 dark:border-rose-900/50 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-rose-800 dark:text-rose-300">
                 <Icons.AlertTriangle />
                 <h3 className="text-sm font-bold">
                   Rechazar Solicitud: {rejectingApplication.businessName}
@@ -1511,27 +1505,27 @@ export default function MerchantApprovals() {
               </div>
               <button
                 onClick={() => setRejectingApplication(null)}
-                className="text-rose-400 hover:text-rose-700"
+                className="text-rose-400 hover:text-rose-700 dark:hover:text-rose-200"
               >
                 <Icons.XMark />
               </button>
             </div>
 
             <div className="p-6 space-y-4">
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-600 dark:text-slate-300">
                 Indica la causal del rechazo para que el solicitante reciba una notificación por
                 correo electrónico y SMS con los pasos correctivos necesarios para subsanar su
                 expediente.
               </p>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   Motivo Principal de Rechazo
                 </label>
                 <select
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-rose-500 focus:outline-none"
                 >
                   <option value="Documentación con inconsistencias o borrosa">
                     Documentación con inconsistencias o borrosa
@@ -1558,7 +1552,7 @@ export default function MerchantApprovals() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   Detalles o Instrucciones de Subsanación (Opcional)
                 </label>
                 <textarea
@@ -1566,16 +1560,16 @@ export default function MerchantApprovals() {
                   value={customRejectionComment}
                   onChange={(e) => setCustomRejectionComment(e.target.value)}
                   placeholder="Ej: Por favor adjuntar la póliza SOAT con vigencia actualizada al año en curso..."
-                  className="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:ring-2 focus:ring-rose-500 focus:outline-none"
+                  className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-rose-500 focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3">
+            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setRejectingApplication(null)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
               >
                 Cancelar
               </button>

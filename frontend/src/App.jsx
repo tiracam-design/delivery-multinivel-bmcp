@@ -20,9 +20,28 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(getCurrentUser());
   const [activeModule, setActiveModule] = useState('client'); // 'client' | 'driver' | 'merchant' | 'admin'
   const [clientSubView, setClientSubView] = useState('checkout'); // 'checkout' | 'tracking'
-  const [createdOrder, setCreatedOrder] = useState(null);
+  const [createdOrder, setCreatedOrder] = useState(() => {
+    try {
+      const stored = localStorage.getItem('delivery_active_order');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.warn('Error reading delivery_active_order:', e);
+    }
+    return null;
+  });
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showBankModal, setShowBankModal] = useState(false);
+
+  // Escuchar actualizaciones de pedidos para sincronización entre módulos
+  useEffect(() => {
+    const handleOrderUpdate = (e) => {
+      if (e?.detail) {
+        setCreatedOrder(e.detail);
+      }
+    };
+    window.addEventListener('order-updated', handleOrderUpdate);
+    return () => window.removeEventListener('order-updated', handleOrderUpdate);
+  }, []);
 
   // Inicializar tema visual
   useEffect(() => {
@@ -300,8 +319,8 @@ export default function App() {
 
           {activeModule === 'driver' && (
             /* Vista adaptada estilo App Nativa para Smartphone */
-            <div className="max-w-md mx-auto shadow-2xl min-h-screen bg-slate-900">
-              <ActiveTrip />
+            <div className="max-w-md mx-auto shadow-2xl min-h-screen bg-slate-100 dark:bg-slate-950 transition-colors duration-200">
+              <ActiveTrip activeOrder={createdOrder} />
             </div>
           )}
 

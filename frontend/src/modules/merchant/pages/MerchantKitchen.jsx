@@ -657,14 +657,14 @@ export default function MerchantKitchen() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       {/* ── TOAST DE NOTIFICACIÓN FLOTANTE ─────────────────────────────────── */}
       {toast && (
         <div
           className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl border shadow-2xl flex items-center gap-3 transition-all animate-bounce ${
             toast.type === 'danger'
-              ? 'bg-rose-950/90 border-rose-500/50 text-rose-200'
-              : 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
+              ? 'bg-rose-100 dark:bg-rose-950/90 border-rose-300 dark:border-rose-500/50 text-rose-800 dark:text-rose-200'
+              : 'bg-emerald-100 dark:bg-emerald-950/90 border-emerald-300 dark:border-emerald-500/50 text-emerald-800 dark:text-emerald-200'
           }`}
         >
           <span>{toast.type === 'danger' ? '⚠️' : '✅'}</span>
@@ -674,17 +674,17 @@ export default function MerchantKitchen() {
 
       {/* ── ALERTA DE COCINA PAUSADA (KITCHEN THROTTLE BANNER) ──────────────── */}
       {isKitchenPaused && (
-        <div className="bg-gradient-to-r from-rose-900/90 via-amber-900/80 to-rose-900/90 border-b border-rose-500/40 px-6 py-2.5 flex items-center justify-between text-xs font-bold text-rose-200 animate-pulse">
+        <div className="bg-gradient-to-r from-rose-600 via-amber-600 to-rose-600 dark:from-rose-900/90 dark:via-amber-900/80 dark:to-rose-900/90 border-b border-rose-500/40 px-6 py-2.5 flex items-center justify-between text-xs font-bold text-white dark:text-rose-200 animate-pulse">
           <div className="flex items-center gap-2">
             <span className="text-base">⏸️</span>
             <span>
               <strong>Cocina Pausada por Saturación Operativa:</strong> Nuevos pedidos en pausa por los próximos{' '}
-              <strong className="text-amber-300 font-mono text-sm">{formatCountdown(countdownSeconds)}</strong> min.
+              <strong className="text-amber-200 dark:text-amber-300 font-mono text-sm">{formatCountdown(countdownSeconds)}</strong> min.
             </span>
           </div>
           <button
             onClick={handleToggleKitchenPause}
-            className="px-3 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-[11px] font-black uppercase transition-all shadow-md active:scale-95"
+            className="px-3 py-1 bg-white text-rose-700 hover:bg-rose-50 dark:bg-rose-600 dark:hover:bg-rose-500 dark:text-white rounded-lg text-[11px] font-black uppercase transition-all shadow-md active:scale-95"
           >
             ▶ Reanudar Ahora
           </button>
@@ -692,24 +692,24 @@ export default function MerchantKitchen() {
       )}
 
       {/* ── BARRA SUPERIOR KDS ────────────────────────────────────────────── */}
-      <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 lg:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30">
+      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 lg:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30 transition-colors">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-rose-500/20">
             🍳
           </div>
           <div>
-            <h1 className="text-base lg:text-lg font-black text-white flex items-center gap-2">
+            <h1 className="text-base lg:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
               Asadero & Parrilladas El Leñador
               <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold border ${
                 isKitchenPaused
-                  ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
-                  : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                  ? 'bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/30 dark:border-rose-500/40'
+                  : 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 dark:border-emerald-500/40'
               }`}>
                 {isKitchenPaused ? '● Pausado (Saturación)' : '● En Línea • Tulcán'}
               </span>
             </h1>
-            <p className="text-xs text-slate-400">
-              Sistema KDS de Cocina en Tiempo Real • Moneda: <strong className="text-emerald-400">$ USD</strong>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Sistema KDS de Cocina en Tiempo Real • Moneda: <strong className="text-emerald-600 dark:text-emerald-400">$ USD</strong>
             </p>
           </div>
         </div>
@@ -722,7 +722,7 @@ export default function MerchantKitchen() {
             className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 border shadow-sm ${
               isKitchenPaused
                 ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 animate-pulse'
-                : 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-amber-500/30'
+                : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300 border-amber-500/30'
             }`}
             title="Pausar nuevos pedidos para gestionar la saturación de la cocina"
           >
@@ -737,8 +737,8 @@ export default function MerchantKitchen() {
             }}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
               soundEnabled
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                : 'bg-slate-800 text-slate-400 border-slate-700'
+                ? 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/30 dark:border-amber-500/40'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
             }`}
           >
             <span>{soundEnabled ? '🔔 Alarma ON' : '🔕 Silenciado'}</span>
@@ -761,7 +761,7 @@ export default function MerchantKitchen() {
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 border ${
               activeTab === 'bank' && isSidebarOpen
                 ? 'bg-amber-500 text-slate-950 border-amber-400'
-                : 'bg-slate-800 hover:bg-slate-700 text-amber-400 border-amber-500/30'
+                : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-400 border-amber-500/30'
             }`}
           >
             <span>💳</span>
@@ -771,7 +771,7 @@ export default function MerchantKitchen() {
           {/* Alternar Vista de Inventario */}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition-all"
+            className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition-all"
           >
             {isSidebarOpen ? 'Ocultar Panel' : '📦 Ver Stock & Caja'}
           </button>
@@ -784,34 +784,34 @@ export default function MerchantKitchen() {
         <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
           {/* Indicadores de Estado */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-slate-900/80 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+            <div className="bg-white dark:bg-slate-900/80 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm dark:shadow-lg transition-colors">
               <div>
-                <span className="text-xs uppercase font-extrabold text-amber-400 block tracking-wider">
+                <span className="text-xs uppercase font-extrabold text-amber-600 dark:text-amber-400 block tracking-wider">
                   Nuevos / Pendientes
                 </span>
-                <span className="text-3xl font-black text-white">{pendingCount}</span>
+                <span className="text-3xl font-black text-slate-900 dark:text-white">{pendingCount}</span>
               </div>
-              <span className="text-3xl text-amber-400/40">⏳</span>
+              <span className="text-3xl text-amber-500/40">⏳</span>
             </div>
 
-            <div className="bg-slate-900/80 border border-sky-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+            <div className="bg-white dark:bg-slate-900/80 border border-sky-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm dark:shadow-lg transition-colors">
               <div>
-                <span className="text-xs uppercase font-extrabold text-sky-400 block tracking-wider">
+                <span className="text-xs uppercase font-extrabold text-sky-600 dark:text-sky-400 block tracking-wider">
                   En Preparación
                 </span>
-                <span className="text-3xl font-black text-white">{preparingCount}</span>
+                <span className="text-3xl font-black text-slate-900 dark:text-white">{preparingCount}</span>
               </div>
-              <span className="text-3xl text-sky-400/40">🔥</span>
+              <span className="text-3xl text-sky-500/40">🔥</span>
             </div>
 
-            <div className="bg-slate-900/80 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+            <div className="bg-white dark:bg-slate-900/80 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm dark:shadow-lg transition-colors">
               <div>
-                <span className="text-xs uppercase font-extrabold text-emerald-400 block tracking-wider">
+                <span className="text-xs uppercase font-extrabold text-emerald-600 dark:text-emerald-400 block tracking-wider">
                   Listos para Retiro
                 </span>
-                <span className="text-3xl font-black text-white">{readyCount}</span>
+                <span className="text-3xl font-black text-slate-900 dark:text-white">{readyCount}</span>
               </div>
-              <span className="text-3xl text-emerald-400/40">🛵</span>
+              <span className="text-3xl text-emerald-500/40">🛵</span>
             </div>
           </div>
 
@@ -825,19 +825,19 @@ export default function MerchantKitchen() {
               return (
                 <div
                   key={order.id}
-                  className={`rounded-2xl border flex flex-col justify-between transition-all shadow-xl ${
+                  className={`rounded-2xl border flex flex-col justify-between transition-all shadow-md dark:shadow-xl ${
                     isPending
-                      ? 'bg-amber-950/20 border-amber-500/50 hover:border-amber-400'
+                      ? 'bg-white dark:bg-amber-950/20 border-amber-300 dark:border-amber-500/50 hover:border-amber-400'
                       : isPreparing
-                      ? 'bg-sky-950/20 border-sky-500/50 hover:border-sky-400'
-                      : 'bg-emerald-950/20 border-emerald-500/50 hover:border-emerald-400'
+                      ? 'bg-white dark:bg-sky-950/20 border-sky-300 dark:border-sky-500/50 hover:border-sky-400'
+                      : 'bg-white dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-500/50 hover:border-emerald-400'
                   }`}
                 >
                   {/* Encabezado del Ticket */}
-                  <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+                  <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between transition-colors">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-black text-sm lg:text-base text-white">
+                        <span className="font-mono font-black text-sm lg:text-base text-slate-900 dark:text-white">
                           {order.id.length > 12 ? order.id.substring(0, 8) + '...' : order.id}
                         </span>
                         <span
@@ -852,20 +852,20 @@ export default function MerchantKitchen() {
                           {isPending ? 'Pendiente' : isPreparing ? 'En Fuego' : 'Listo'}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">{order.time}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{order.time}</p>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-base font-extrabold text-emerald-400">${order.total.toFixed(2)}</span>
-                      <p className="text-[10px] text-slate-400 uppercase">{order.paymentMethod}</p>
+                      <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">${order.total.toFixed(2)}</span>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase">{order.paymentMethod}</p>
                     </div>
                   </div>
 
                   {/* Datos del Cliente */}
-                  <div className="px-4 py-2.5 bg-slate-900/50 text-xs flex items-center justify-between border-b border-slate-800/80">
+                  <div className="px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 text-xs flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 transition-colors">
                     <div>
-                      <span className="font-bold text-slate-200">👤 {order.clientName}</span>
-                      <p className="text-[11px] text-slate-400 truncate max-w-xs">📍 {order.address}</p>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">👤 {order.clientName}</span>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-xs">📍 {order.address}</p>
                     </div>
                   </div>
 
@@ -874,13 +874,13 @@ export default function MerchantKitchen() {
                     {order.items.map((item, idx) => (
                       <div key={idx} className="flex items-start justify-between text-xs">
                         <div className="flex items-start gap-2.5">
-                          <span className="w-5 h-5 rounded-md bg-slate-800 text-amber-400 font-extrabold flex items-center justify-center shrink-0">
+                          <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-800 text-amber-700 dark:text-amber-400 font-extrabold flex items-center justify-center shrink-0 border border-slate-200 dark:border-transparent">
                             {item.qty}
                           </span>
                           <div>
-                            <span className="font-bold text-slate-100">{item.name}</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-100">{item.name}</span>
                             {item.notes && (
-                              <p className="text-[11px] text-amber-400/90 font-medium italic mt-0.5">
+                              <p className="text-[11px] text-amber-600 dark:text-amber-400/90 font-medium italic mt-0.5">
                                 Nota: "{item.notes}"
                               </p>
                             )}
@@ -892,14 +892,14 @@ export default function MerchantKitchen() {
 
                   {/* Repartidor asignado si está listo */}
                   {isReady && order.driverName && (
-                    <div className="px-4 py-2.5 bg-emerald-950/40 border-t border-emerald-500/20 text-xs text-emerald-300 flex items-center gap-2">
+                    <div className="px-4 py-2.5 bg-emerald-50 dark:bg-emerald-950/40 border-t border-emerald-200 dark:border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
                       <span>🛵</span>
                       <span>Repartidor: <strong>{order.driverName}</strong></span>
                     </div>
                   )}
 
                   {/* Botón de Acción de Cocina */}
-                  <div className="p-3 bg-slate-900/70 border-t border-slate-800">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-900/70 border-t border-slate-200 dark:border-slate-800 transition-colors">
                     {isPending && (
                       <button
                         onClick={() => advanceOrderStatus(order.id)}
@@ -919,8 +919,8 @@ export default function MerchantKitchen() {
                     )}
 
                     {isReady && (
-                      <div className="py-2 text-center text-xs font-bold text-emerald-400 flex items-center justify-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                      <div className="py-2 text-center text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                         <span>Esperando retiro por repartidor</span>
                       </div>
                     )}
@@ -933,15 +933,15 @@ export default function MerchantKitchen() {
 
         {/* ── PANEL LATERAL: INVENTARIO, PLATOS Y FINANZAS ────────────────── */}
         {isSidebarOpen && (
-          <aside className="w-full lg:w-96 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col h-full overflow-hidden">
+          <aside className="w-full lg:w-96 bg-white dark:bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 flex flex-col h-full overflow-hidden transition-colors">
             {/* Pestañas del Panel */}
-            <div className="flex border-b border-slate-800 bg-slate-950/50 shrink-0">
+            <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-950/50 shrink-0">
               <button
                 onClick={() => setActiveTab('orders')}
                 className={`flex-1 py-3 text-xs font-bold transition-all border-b-2 flex items-center justify-center gap-1.5 ${
                   activeTab === 'orders'
-                    ? 'border-amber-500 text-amber-400 bg-slate-900'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-amber-500 text-amber-600 dark:text-amber-400 bg-white dark:bg-slate-900'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 <span>📦</span>
@@ -952,8 +952,8 @@ export default function MerchantKitchen() {
                 onClick={() => setActiveTab('finances')}
                 className={`flex-1 py-3 text-xs font-bold transition-all border-b-2 flex items-center justify-center gap-1.5 ${
                   activeTab === 'finances'
-                    ? 'border-emerald-500 text-emerald-400 bg-slate-900'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-900'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 <span>💰</span>
@@ -964,8 +964,8 @@ export default function MerchantKitchen() {
                 onClick={() => setActiveTab('bank')}
                 className={`flex-1 py-3 text-xs font-bold transition-all border-b-2 flex items-center justify-center gap-1.5 ${
                   activeTab === 'bank'
-                    ? 'border-amber-500 text-amber-400 bg-slate-900'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                    ? 'border-amber-500 text-amber-600 dark:text-amber-400 bg-white dark:bg-slate-900'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 <span>💳</span>
@@ -978,10 +978,10 @@ export default function MerchantKitchen() {
               <div className="flex-1 p-4 lg:p-5 overflow-y-auto space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xs font-black uppercase tracking-wider text-slate-200">
+                    <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
                       Catálogo del Asadero
                     </h2>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
                       Disponibilidad en vivo en la app del cliente
                     </p>
                   </div>
@@ -1001,8 +1001,8 @@ export default function MerchantKitchen() {
                         key={product.id}
                         className={`p-3 rounded-xl border transition-all flex flex-col gap-2 ${
                           isAvailable
-                            ? 'bg-slate-800/60 border-slate-700/80 hover:border-slate-600'
-                            : 'bg-rose-950/20 border-rose-500/40 opacity-75'
+                            ? 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600'
+                            : 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-500/40 opacity-75'
                         }`}
                       >
                         <div className="flex items-start gap-3">
@@ -1010,35 +1010,35 @@ export default function MerchantKitchen() {
                           <img
                             src={product.imageUrl || 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500'}
                             alt={product.name}
-                            className="w-12 h-12 rounded-lg object-cover bg-slate-900 border border-slate-700 shrink-0"
+                            className="w-12 h-12 rounded-lg object-cover bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shrink-0"
                             onError={(e) => {
                               e.target.src = 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500';
                             }}
                           />
                           <div className="overflow-hidden flex-1">
                             <div className="flex items-center justify-between gap-1">
-                              <span className="font-bold text-xs text-slate-100 truncate">
+                              <span className="font-bold text-xs text-slate-800 dark:text-slate-100 truncate">
                                 {product.name}
                               </span>
-                              <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 border border-slate-700 shrink-0">
+                              <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-amber-700 dark:text-amber-400 border border-slate-300 dark:border-slate-700 shrink-0">
                                 {product.category || 'Plato'}
                               </span>
                             </div>
-                            <span className="text-xs text-emerald-400 font-extrabold block mt-0.5">
+                            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-extrabold block mt-0.5">
                               ${Number(product.price).toFixed(2)} USD
                             </span>
                           </div>
                         </div>
 
                         {/* Barra de Acciones del Plato */}
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[11px]">
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800/80 text-[11px]">
                           {/* Switch de Disponibilidad */}
                           <button
                             onClick={() => toggleStock(product.id)}
                             className={`px-2.5 py-1 rounded-lg font-black transition-all flex items-center gap-1 ${
                               isAvailable
-                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-rose-500/20 hover:text-rose-300'
-                                : 'bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-emerald-500/20 hover:text-emerald-300'
+                                ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 dark:border-emerald-500/40 hover:bg-rose-500/10 hover:text-rose-700'
+                                : 'bg-rose-500/10 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30 dark:border-rose-500/40 hover:bg-emerald-500/10 hover:text-emerald-700'
                             }`}
                           >
                             <span>{isAvailable ? '✓ Disponible' : '✕ Agotado'}</span>
@@ -1047,14 +1047,14 @@ export default function MerchantKitchen() {
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => handleOpenEditModal(product)}
-                              className="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition"
+                              className="px-2 py-1 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-semibold transition"
                               title="Editar datos del plato"
                             >
                               ✏️ Editar
                             </button>
                             <button
                               onClick={() => setDishToDelete(product)}
-                              className="px-2 py-1 rounded-md bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 font-semibold transition"
+                              className="px-2 py-1 rounded-md bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/50 font-semibold transition"
                               title="Eliminar plato del menú"
                             >
                               🗑️
@@ -1072,60 +1072,60 @@ export default function MerchantKitchen() {
             {activeTab === 'finances' && (
               <div className="flex-1 p-4 lg:p-5 overflow-y-auto space-y-5">
                 <div>
-                  <h2 className="text-xs font-black uppercase tracking-wider text-slate-200">
+                  <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
                     Cierre de Caja Diario
                   </h2>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Métricas de facturación en Tulcán • {financialSummary.date}
                   </p>
                 </div>
 
                 {/* Tarjeta de Ventas Totales */}
-                <div className="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-2xl p-4 shadow-xl">
-                  <span className="text-[11px] font-extrabold uppercase text-emerald-400 tracking-wider">
+                <div className="bg-emerald-50 dark:bg-gradient-to-br dark:from-emerald-950/60 dark:to-slate-900 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl p-4 shadow-sm dark:shadow-xl transition-colors">
+                  <span className="text-[11px] font-extrabold uppercase text-emerald-700 dark:text-emerald-400 tracking-wider">
                     Ventas Acumuladas del Turno
                   </span>
-                  <div className="text-3xl font-black text-white mt-1">
+                  <div className="text-3xl font-black text-slate-900 dark:text-white mt-1">
                     ${Number(financialSummary.totalSales).toFixed(2)}{' '}
-                    <span className="text-xs font-bold text-emerald-400">{financialSummary.currency}</span>
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{financialSummary.currency}</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-emerald-500/20 text-xs">
+                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-emerald-200 dark:border-emerald-500/20 text-xs">
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Efectivo (USD):</span>
-                      <strong className="text-slate-200">${Number(financialSummary.cashSales).toFixed(2)}</strong>
+                      <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Efectivo (USD):</span>
+                      <strong className="text-slate-800 dark:text-slate-200">${Number(financialSummary.cashSales).toFixed(2)}</strong>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Transferencia / App:</span>
-                      <strong className="text-slate-200">${Number(financialSummary.transferSales).toFixed(2)}</strong>
+                      <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Transferencia / App:</span>
+                      <strong className="text-slate-800 dark:text-slate-200">${Number(financialSummary.transferSales).toFixed(2)}</strong>
                     </div>
                   </div>
                 </div>
 
                 {/* Métricas Operativas */}
-                <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs">
-                  <div className="flex justify-between text-slate-300">
+                <div className="bg-slate-100/70 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 space-y-2 text-xs transition-colors">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-300">
                     <span>Pedidos completados:</span>
-                    <strong className="text-white">{financialSummary.completedOrdersCount}</strong>
+                    <strong className="text-slate-900 dark:text-white">{financialSummary.completedOrdersCount}</strong>
                   </div>
-                  <div className="flex justify-between text-slate-300">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-300">
                     <span>Tiempo prom. cocción:</span>
-                    <strong className="text-amber-400">{financialSummary.averagePreparationMinutes} min</strong>
+                    <strong className="text-amber-600 dark:text-amber-400">{financialSummary.averagePreparationMinutes} min</strong>
                   </div>
-                  <div className="flex justify-between text-slate-300">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-300">
                     <span>Área operativa:</span>
-                    <strong className="text-slate-200">{financialSummary.city}</strong>
+                    <strong className="text-slate-800 dark:text-slate-200">{financialSummary.city || 'Tulcán'}</strong>
                   </div>
                 </div>
 
                 {/* Botones de Exportación */}
                 <div className="space-y-2 pt-2">
-                  <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
+                  <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                     Exportar Reporte del Cierre
                   </span>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={exportToCsv}
-                      className="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow"
+                      className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm"
                     >
                       <span>📊 Exportar CSV</span>
                     </button>
@@ -1152,31 +1152,31 @@ export default function MerchantKitchen() {
 
       {/* ── MODAL: CREAR / EDITAR PLATO ────────────────────────────────────── */}
       {dishModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl relative animate-in fade-in zoom-in-95">
-            <h3 className="text-base font-black text-white flex items-center gap-2 mb-1">
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl relative animate-in fade-in zoom-in-95 transition-colors">
+            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2 mb-1">
               <span>{editingDish ? '✏️ Editar Plato' : '🍳 Crear Nuevo Plato'}</span>
             </h3>
-            <p className="text-xs text-slate-400 mb-4">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
               Ingresa los datos del plato para el menú oficial de Tulcán.
             </p>
 
             <form onSubmit={handleSaveDish} className="space-y-3.5">
               <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Nombre del Plato *</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Nombre del Plato *</label>
                 <input
                   type="text"
                   required
                   placeholder="Ej. Hornado Pastuso Tradicional"
                   value={dishForm.name}
                   onChange={(e) => setDishForm({ ...dishForm, name: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Precio ($ USD) *</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Precio ($ USD) *</label>
                   <input
                     type="number"
                     step="0.01"
@@ -1185,16 +1185,16 @@ export default function MerchantKitchen() {
                     placeholder="Ej. 12.50"
                     value={dishForm.price}
                     onChange={(e) => setDishForm({ ...dishForm, price: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-emerald-400 font-bold placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-emerald-600 dark:text-emerald-400 font-bold placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Categoría</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Categoría</label>
                   <select
                     value={dishForm.category}
                     onChange={(e) => setDishForm({ ...dishForm, category: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
                   >
                     <option value="Platos Fuertes">Platos Fuertes</option>
                     <option value="Especialidades">Especialidades</option>
@@ -1206,24 +1206,24 @@ export default function MerchantKitchen() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Descripción</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Descripción</label>
                 <textarea
                   rows="2"
                   placeholder="Guarniciones, ingredientes o preparación..."
                   value={dishForm.description}
                   onChange={(e) => setDishForm({ ...dishForm, description: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 resize-none"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500 resize-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">URL de Imagen</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">URL de Imagen</label>
                 <input
                   type="url"
                   placeholder="https://images.unsplash.com/..."
                   value={dishForm.imageUrl}
                   onChange={(e) => setDishForm({ ...dishForm, imageUrl: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
@@ -1233,18 +1233,18 @@ export default function MerchantKitchen() {
                   id="dishAvailableCheckbox"
                   checked={dishForm.available}
                   onChange={(e) => setDishForm({ ...dishForm, available: e.target.checked })}
-                  className="w-4 h-4 rounded text-emerald-500 bg-slate-800 border-slate-700 focus:ring-0"
+                  className="w-4 h-4 rounded text-emerald-500 bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 focus:ring-0"
                 />
-                <label htmlFor="dishAvailableCheckbox" className="text-xs font-bold text-slate-300 cursor-pointer">
+                <label htmlFor="dishAvailableCheckbox" className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
                   Marcar disponible de inmediato para pedidos
                 </label>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setDishModalOpen(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition"
                 >
                   Cancelar
                 </button>
@@ -1262,19 +1262,19 @@ export default function MerchantKitchen() {
 
       {/* ── MODAL: CONFIRMACIÓN DE ELIMINACIÓN ───────────────────────────────── */}
       {dishToDelete && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-rose-500/40 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative text-center">
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-rose-300 dark:border-rose-500/40 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative text-center transition-colors">
             <span className="text-4xl block mb-2">🗑️</span>
-            <h3 className="text-base font-black text-white mb-1">
+            <h3 className="text-base font-black text-slate-900 dark:text-white mb-1">
               ¿Eliminar "{dishToDelete.name}"?
             </h3>
-            <p className="text-xs text-slate-400 mb-5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
               Esta acción eliminará el plato permanentemente del catálogo del restaurante.
             </p>
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => setDishToDelete(null)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition"
               >
                 Cancelar
               </button>

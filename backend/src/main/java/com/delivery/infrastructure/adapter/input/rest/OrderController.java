@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -112,6 +113,39 @@ public class OrderController {
     public ResponseEntity<?> getOrderById(@PathVariable UUID orderId) {
         return orderRepositoryPort.findById(orderId)
                 .map(order -> ResponseEntity.ok(toResponse(order)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // ── Consultar Pedido Más Reciente ───────────────────────────────
+
+    @GetMapping("/latest")
+    @Operation(summary = "Consultar pedido más reciente", description = "Obtiene el último pedido registrado en el sistema.")
+    public ResponseEntity<?> getLatestOrder() {
+        UUID defaultCustomer = UUID.fromString("00000000-0000-0000-0001-000000000001");
+        List<Order> orders = orderRepositoryPort.findByCustomerId(defaultCustomer);
+        if (orders.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(toResponse(orders.get(0)));
+    }
+
+    // ── Regenerar PIN de Entrega (Anti-Fraude) ─────────────────────
+
+    @PostMapping("/{orderId}/regenerate-pin")
+    @Operation(summary = "Regenerar PIN de entrega (anti-fraude)",
+               description = "Genera un nuevo PIN OTP de 4 dígitos para el pedido especificado.")
+    public ResponseEntity<?> regenerateDeliveryPin(@PathVariable UUID orderId) {
+        return orderRepositoryPort.findById(orderId)
+                .map(order -> {
+                    order.regenerateDeliveryPin();
+                    Order saved = orderRepositoryPort.save(order);
+                    return ResponseEntity.ok(Map.of(
+                            "orderId", saved.getId(),
+                            "deliveryPin", saved.getDeliveryPin() != null ? saved.getDeliveryPin().getValue() : "",
+                            "status", saved.getStatus().name(),
+                            "message", "Nuevo código de verificación generado exitosamente"
+                    ));
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
