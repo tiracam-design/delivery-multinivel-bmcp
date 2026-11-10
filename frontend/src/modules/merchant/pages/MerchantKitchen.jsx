@@ -266,18 +266,75 @@ export default function MerchantKitchen() {
     }
   };
 
+  const syncStoredActiveOrder = () => {
+    try {
+      const activeStr = localStorage.getItem('delivery_active_order');
+      if (activeStr) {
+        const active = JSON.parse(activeStr);
+        if (active && active.id) {
+          setOrders(prev => {
+            const exists = prev.some(o => o.id === active.id);
+            const mappedStatus = (active.status === 'IN_PREPARATION' || active.status === 'EN_PREPARACION')
+              ? 'PREPARING'
+              : (active.status === 'READY_FOR_PICKUP' || active.status === 'READY')
+                ? 'READY'
+                : (active.status === 'DELIVERED' || active.status === 'ENTREGADO')
+                  ? 'DELIVERED'
+                  : 'PENDING';
+
+            if (mappedStatus === 'DELIVERED') {
+              return prev.filter(o => o.id !== active.id);
+            }
+
+            if (exists) {
+              return prev.map(o => o.id === active.id ? { ...o, status: mappedStatus } : o);
+            }
+
+            return [
+              {
+                id: active.id,
+                clientName: active.customerName || 'Cliente Tulcán (Carchi)',
+                address: active.deliveryAddress || 'Sector Centro, Tulcán',
+                time: 'Recién entrante',
+                elapsedMinutes: 0,
+                status: mappedStatus,
+                total: Number(active.total || active.totalAmount || 12.50),
+                paymentMethod: active.paymentMethod || 'EFECTIVO ($ USD)',
+                items: Array.isArray(active.items) && active.items.length > 0
+                  ? active.items.map(it => ({ name: it.name || it.title || 'Plato', qty: it.qty || it.quantity || 1, notes: it.notes || '' }))
+                  : [{ name: 'Pedido Completo en Cocina', qty: 1, notes: active.notes || 'Comanda entrante' }]
+              },
+              ...prev
+            ];
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Error syncing active order in KDS:', e);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
     fetchKitchenStatus();
     fetchFinancialSummary();
     fetchPendingOrders();
+    syncStoredActiveOrder();
+
+    const handleOrderUpdate = () => syncStoredActiveOrder();
+    window.addEventListener('order-updated', handleOrderUpdate);
+    window.addEventListener('storage', handleOrderUpdate);
 
     // Sincronización en tiempo real (Polling cada 5 segundos)
     const interval = setInterval(() => {
       fetchPendingOrders();
     }, 5000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('order-updated', handleOrderUpdate);
+      window.removeEventListener('storage', handleOrderUpdate);
+    };
   }, [soundEnabled]);
 
   // Temporizador de cuenta regresiva si la cocina está pausada
@@ -390,17 +447,36 @@ export default function MerchantKitchen() {
       console.warn('Backend KDS endpoint sync:', e);
     }
 
+    let updatedActiveStatus = null;
     setOrders(prev =>
       prev.map(order => {
         if (order.id !== orderId) return order;
-        if (order.status === 'PENDING') return { ...order, status: 'PREPARING', elapsedMinutes: 0 };
+        if (order.status === 'PENDING') {
+          updatedActiveStatus = 'IN_PREPARATION';
+          return { ...order, status: 'PREPARING', elapsedMinutes: 0 };
+        }
         if (order.status === 'PREPARING') {
           if (soundEnabled) playKitchenChime();
+          updatedActiveStatus = 'READY_FOR_PICKUP';
           return { ...order, status: 'READY', driverName: 'Carlos Mendoza (En camino al local)' };
         }
         return order;
       })
     );
+
+    if (updatedActiveStatus) {
+      try {
+        const stored = localStorage.getItem('delivery_active_order');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          parsed.status = updatedActiveStatus;
+          localStorage.setItem('delivery_active_order', JSON.stringify(parsed));
+          window.dispatchEvent(new CustomEvent('order-updated', { detail: parsed }));
+        }
+      } catch (err) {
+        console.warn('Error sincronizando orden activa desde KDS:', err);
+      }
+    }
   };
 
   // ── CRUD: CREAR O EDITAR PLATO ────────────────────────────────────────────

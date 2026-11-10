@@ -60,12 +60,12 @@ export default function InteractiveMapBackground({ activeField = null }) {
     },
     {
       id: 'hub-gad',
-      name: 'Hub Central GAD Municipal Tulcán',
+      name: 'Hub Central Logístico Tulcán',
       role: 'Centro de Despacho',
-      vehicle: '🏢 Servidor PostGIS + Redis',
+      vehicle: '🏢 Central de Monitoreo Tulcán',
       location: 'Calle 10 de Agosto y Olmedo',
       coords: '0.8122° N, -77.7165° W',
-      status: 'Despacho automático y radar STOMP activo',
+      status: 'Despacho y monitoreo de flota en vivo',
       speed: 'Operativo',
       color: '#818cf8', // Indigo
       badgeBg: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
@@ -346,9 +346,9 @@ export default function InteractiveMapBackground({ activeField = null }) {
           Coords: <span className="text-sky-400">0.8116° N, -77.7172° W</span> • Elev: <span className="text-amber-400">2,980m</span>
         </div>
         <div className="text-[10px] text-emerald-400/90 flex items-center gap-1.5">
-          <span>📡 4 Unidades en Enlace PostGIS</span>
+          <span>📡 Flota Operativa en Ruta</span>
           <span>•</span>
-          <span>Redis TTL 15s</span>
+          <span>Sincronizado en Tiempo Real</span>
         </div>
       </div>
 

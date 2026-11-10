@@ -698,11 +698,11 @@ export default function TrackingPage({
             <div className="flex items-center space-x-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
               <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                Tracking PostGIS en Vivo
+                Monitoreo de Entrega en Tiempo Real
               </span>
             </div>
             <div className="text-right text-xs text-slate-400 font-mono">
-              STOMP: /topic/orders/{orderState.id.slice(0, 8)}.../tracking
+              Seguimiento Satelital Activo
             </div>
           </div>
 

@@ -223,9 +223,24 @@ export default function ActiveTrip({ activeOrder = null }) {
     };
   }, [activeOrder]);
 
-  // ── EMISOR DE TELEMETRÍA GPS CADA 3 SEGUNDOS ──────────────────────────────
+  // ── EMISOR DE TELEMETRÍA GPS CADA 3 SEGUNDOS Y SINCRONIZACIÓN DE RUTA ─────
   useEffect(() => {
     if (tripState !== 'ACTIVE_TRIP') return;
+
+    // Sincronizar estado ON_THE_WAY con la orden activa
+    try {
+      const stored = localStorage.getItem('delivery_active_order');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.status !== 'ON_THE_WAY' && parsed.status !== 'DELIVERED') {
+          parsed.status = 'ON_THE_WAY';
+          localStorage.setItem('delivery_active_order', JSON.stringify(parsed));
+          window.dispatchEvent(new CustomEvent('order-updated', { detail: parsed }));
+        }
+      }
+    } catch (e) {
+      console.warn('Error sincronizando estado ON_THE_WAY:', e);
+    }
 
     const interval = setInterval(() => {
       // Simula pequeñas variaciones de coordenadas en ruta
@@ -345,6 +360,20 @@ export default function ActiveTrip({ activeOrder = null }) {
       }
 
       if (confirmed || candidatePin === tripData.customerPinExpected || candidatePin === '1234') {
+        // Sincronizar estado final DELIVERED en localStorage y disparar evento global
+        try {
+          const stored = localStorage.getItem('delivery_active_order');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            parsed.status = 'DELIVERED';
+            parsed.deliveredAt = new Date().toISOString();
+            localStorage.setItem('delivery_active_order', JSON.stringify(parsed));
+            window.dispatchEvent(new CustomEvent('order-updated', { detail: parsed }));
+          }
+        } catch (e) {
+          console.warn('Error sincronizando estado DELIVERED:', e);
+        }
+
         // Validación Exitosa
         setIsPinModalOpen(false);
         setTripState('SUCCESS_ANIMATION');
