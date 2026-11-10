@@ -5,8 +5,39 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f59e0b'><path d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z'/></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sistema Delivery Multinivel BMCP</title>
+
+    <!--
+      ══════════════════════════════════════════════════════════════════════
+      ANTI-FOUC SCRIPT — Delivery Multinivel BMCP
+      Se ejecuta de forma bloqueante ANTES del primer paint para aplicar
+      la clase 'dark' al <html> sin parpadeo de tema incorrecto.
+      No depende de React ni de ningún módulo JS del bundle.
+      ══════════════════════════════════════════════════════════════════════
+    -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('delivery_theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          // Aplica 'dark' si: está guardado como 'dark', o no hay preferencia guardada (default oscuro del sistema)
+          if (saved === 'dark' || (!saved && prefersDark) || (!saved && true)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {
+          // Si localStorage no está disponible, aplica modo oscuro por defecto
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
-  <body class="bg-slate-50 text-slate-900 antialiased">
+  <!--
+    El body NO tiene clases de color hardcodeadas.
+    El fondo lo controla App.jsx con bg-slate-50 dark:bg-slate-950.
+    Antialiased se mantiene como utilidad tipográfica pura.
+  -->
+  <body class="antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -2,6 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — BMCP Delivery Multinivel
+   Variables CSS que mapean los dos modos del sistema de colores.
+   Usadas para cualquier propiedad que Tailwind no cubra directamente.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer base {
+  :root {
+    /* Modo Claro — valores por defecto */
+    --color-surface:  #f8fafc;   /* slate-50  */
+    --color-panel:    #ffffff;   /* white     */
+    --color-muted:    #f1f5f9;   /* slate-100 */
+    --color-border:   #e2e8f0;   /* slate-200 */
+    --color-ink:      #0f172a;   /* slate-900 */
+    --color-subtle:   #64748b;   /* slate-500 */
+    --color-brand:    #f59e0b;   /* amber-500 */
+    --color-accent:   #10b981;   /* emerald-500 */
+  }
+
+  .dark {
+    /* Modo Oscuro */
+    --color-surface:  #020617;   /* slate-950 */
+    --color-panel:    #0f172a;   /* slate-900 */
+    --color-muted:    #1e293b;   /* slate-800 */
+    --color-border:   #334155;   /* slate-700 */
+    --color-ink:      #f1f5f9;   /* slate-100 */
+    --color-subtle:   #94a3b8;   /* slate-400 */
+    --color-brand:    #fbbf24;   /* amber-400 */
+    --color-accent:   #34d399;   /* emerald-400 */
+  }
+
+  /* Transición de tema suave y global — se aplica a todos los elementos */
+  *,
+  *::before,
+  *::after {
+    transition-property: color, background-color, border-color, fill, stroke, box-shadow;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+  }
+
+  /* Excepciones: elementos que NO deben transicionar (animaciones existentes) */
+  .animate-ping,
+  .animate-pulse,
+  .animate-spin,
+  .animate-bounce,
+  .animate-radarSweep,
+  .animate-shimmer,
+  .animate-floatSlow,
+  .animate-dashFlow,
+  .animate-dashFlowFast {
+    transition: none !important;
+  }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.97); }
   to { opacity: 1; transform: scale(1); }

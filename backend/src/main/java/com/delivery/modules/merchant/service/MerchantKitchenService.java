@@ -28,6 +28,7 @@ public class MerchantKitchenService {
     private final OrderJpaRepository orderJpaRepository;
     private final AcceptOrderUseCase acceptOrderUseCase;
     private final ToggleProductStockUseCase toggleProductStockUseCase;
+    private final com.delivery.infrastructure.adapter.output.persistence.repository.UserJpaRepository userJpaRepository;
 
     // Control operativo de capacidad de cocina (Kitchen Throttle)
     private volatile boolean kitchenPaused = false;
@@ -36,23 +37,31 @@ public class MerchantKitchenService {
 
     public MerchantKitchenService(OrderJpaRepository orderJpaRepository,
                                   AcceptOrderUseCase acceptOrderUseCase,
-                                  ToggleProductStockUseCase toggleProductStockUseCase) {
+                                  ToggleProductStockUseCase toggleProductStockUseCase,
+                                  com.delivery.infrastructure.adapter.output.persistence.repository.UserJpaRepository userJpaRepository) {
         this.orderJpaRepository = orderJpaRepository;
         this.acceptOrderUseCase = acceptOrderUseCase;
         this.toggleProductStockUseCase = toggleProductStockUseCase;
+        this.userJpaRepository = userJpaRepository;
     }
 
     public List<KitchenOrderResponseDTO> getPendingKitchenOrders() {
         return orderJpaRepository.findByStatusOrderByCreatedAtAsc("CREATED").stream()
-                .map(o -> new KitchenOrderResponseDTO(
-                        o.getId(),
-                        o.getStatus(),
-                        "Cliente Tulcán (Carchi)",
-                        o.getDeliveryAddress(),
-                        o.getTotalAmount(),
-                        o.getNotes(),
-                        o.getCreatedAt()
-                ))
+                .map(o -> {
+                    // Resolver nombre real del cliente desde la tabla users
+                    String customerName = userJpaRepository.findById(o.getCustomerId())
+                            .map(u -> u.getFullName())
+                            .orElse("Cliente");
+                    return new KitchenOrderResponseDTO(
+                            o.getId(),
+                            o.getStatus(),
+                            customerName,
+                            o.getDeliveryAddress(),
+                            o.getTotalAmount(),
+                            o.getNotes(),
+                            o.getCreatedAt()
+                    );
+                })
                 .toList();
     }
 
@@ -135,13 +144,9 @@ public class MerchantKitchenService {
             recentTransactions.add(tx);
         }
 
-        // Si la base de datos recién inicia, incorporar la base operativa del restaurante
-        if (totalSales.compareTo(BigDecimal.ZERO) == 0) {
-            totalSales = new BigDecimal("384.50");
-            completedCount = 28;
-        }
-
-        BigDecimal cashShare = totalSales.multiply(new BigDecimal("0.65")).setScale(2, RoundingMode.HALF_UP);
+        // Si la base de datos no tiene pedidos completados aún, devolver ceros reales
+        // en lugar de valores ficticios de demostración
+        BigDecimal cashShare    = totalSales.multiply(new BigDecimal("0.65")).setScale(2, RoundingMode.HALF_UP);
         BigDecimal transferShare = totalSales.subtract(cashShare);
 
         Map<String, Object> summary = new LinkedHashMap<>();
@@ -150,7 +155,7 @@ public class MerchantKitchenService {
         summary.put("totalSales", totalSales);
         summary.put("cashSales", cashShare);
         summary.put("transferSales", transferShare);
-        summary.put("completedOrdersCount", Math.max(completedCount, 28));
+        summary.put("completedOrdersCount", completedCount);
         summary.put("inPreparationCount", preparingCount);
         summary.put("pendingCount", pendingCount);
         summary.put("averagePreparationMinutes", 14);

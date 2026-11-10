@@ -17,12 +17,12 @@ import { getWebSocketUrl, buildApiUrl, getAuthToken } from '../../../services/ap
 // ── ICONOS SVG EMBEBIDOS (Cero dependencias externas requeridas) ─────────────
 const Icons = {
   ShieldCheck: () => (
-    <svg className="w-6 h-6 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
     </svg>
   ),
   Lock: () => (
-    <svg className="w-5 h-5 text-yellow-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="w-5 h-5 text-amber-700 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
     </svg>
   ),
@@ -244,12 +244,13 @@ export default function TrackingPage({
         }
       }));
 
-      // Si el pedido tiene un UUID real, consultar el backend para obtener el estado y PIN más reciente
+      // Si el pedido tiene un UUID real, consultar el backend para obtener estado, PIN y GPS reales
       const isUuid = (v) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
       if (order.id && isUuid(order.id)) {
         try {
           const token = getAuthToken();
-          const res = await fetch(buildApiUrl(`/v1/orders/${order.id}`), {
+          // Usar el endpoint de tracking del módulo cliente que devuelve datos reales
+          const res = await fetch(buildApiUrl(`/v1/modules/client/tracking/${order.id}`), {
             headers: {
               'Accept': 'application/json',
               'ngrok-skip-browser-warning': 'true',
@@ -258,17 +259,41 @@ export default function TrackingPage({
           });
           if (res.ok) {
             const data = await res.json();
-            if (data && data.deliveryPin) {
+            if (data) {
               setOrderState((prev) => ({
                 ...prev,
-                deliveryPin: data.deliveryPin,
-                status: data.status || prev.status,
-                totalAmount: data.totalAmount ? Number(data.totalAmount).toFixed(2) : prev.totalAmount
+                status:       data.status       || prev.status,
+                deliveryPin:  data.deliveryPin   || prev.deliveryPin,
+                totalAmount:  data.totalAmount   ? Number(data.totalAmount).toFixed(2) : prev.totalAmount,
+                merchant: {
+                  ...prev.merchant,
+                  name:    data.merchantName    || prev.merchant.name,
+                  address: data.pickupAddress   || prev.merchant.address,
+                },
+                customer: {
+                  ...prev.customer,
+                  address: data.deliveryAddress || prev.customer.address,
+                },
+                driver: {
+                  ...prev.driver,
+                  name:  data.driverName  || prev.driver.name,
+                  phone: data.driverPhone || prev.driver.phone,
+                  level: data.driverLevel || prev.driver.level,
+                },
               }));
+              // Actualizar coordenadas GPS reales del repartidor si están disponibles
+              if (data.driverLatitude != null && data.driverLongitude != null) {
+                setDriverLocation((prev) => ({
+                  ...prev,
+                  lat: data.driverLatitude,
+                  lon: data.driverLongitude,
+                  lastUpdate: new Date(),
+                }));
+              }
             }
           }
         } catch (e) {
-          console.warn('Backend order sync fallback:', e);
+          console.warn('Backend tracking sync fallback:', e);
         }
       }
     };
@@ -536,7 +561,7 @@ export default function TrackingPage({
         <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <span className="text-xs uppercase tracking-wider font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+              <span className="text-xs uppercase tracking-wider font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/15 px-3 py-1 rounded-full border border-amber-200 dark:border-amber-500/30 transition-colors">
                 Estado Actual
               </span>
               <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-2">
@@ -588,10 +613,10 @@ export default function TrackingPage({
                     <span
                       className={`text-xs font-bold mt-2 truncate w-full ${
                         isCurrent
-                          ? 'text-slate-900'
+                          ? 'text-slate-900 dark:text-white'
                           : isCompleted
-                          ? 'text-emerald-700'
-                          : 'text-slate-400'
+                          ? 'text-emerald-700 dark:text-emerald-400'
+                          : 'text-slate-400 dark:text-slate-500'
                       }`}
                     >
                       {step.label}
@@ -609,7 +634,7 @@ export default function TrackingPage({
             ═══════════════════════════════════════════════════════════════════ */}
         <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
           <div className="flex items-center space-x-3 mb-4">
-            <span className="p-2 rounded-xl bg-yellow-50 border border-yellow-200">
+            <span className="p-2 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 transition-colors">
               <Icons.ShieldCheck />
             </span>
             <div>
@@ -623,7 +648,7 @@ export default function TrackingPage({
           </div>
 
           {/* CAJA OBLIGATORIA CON LAS CLASES EXACTAS DE TAILWIND */}
-          <div className="bg-yellow-100 border-2 border-yellow-400 p-6 rounded-2xl text-center text-4xl font-bold tracking-widest text-gray-900 shadow-inner relative group transition-all duration-200">
+          <div className="bg-amber-50 dark:bg-amber-500/10 border-2 border-amber-400 dark:border-amber-500/60 p-6 rounded-2xl text-center text-4xl font-bold tracking-widest text-amber-900 dark:text-amber-200 shadow-inner relative group transition-colors">
             <div className="flex items-center justify-center space-x-4">
               <span>{orderState.deliveryPin}</span>
             </div>
@@ -632,7 +657,7 @@ export default function TrackingPage({
               <button
                 onClick={copyPinToClipboard}
                 type="button"
-                className="inline-flex items-center space-x-1.5 text-xs font-bold text-yellow-900 bg-yellow-200/80 hover:bg-yellow-300 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                className="inline-flex items-center space-x-1.5 text-xs font-bold text-amber-900 dark:text-amber-200 bg-amber-200/80 dark:bg-amber-500/20 hover:bg-amber-300 dark:hover:bg-amber-500/30 px-3 py-1.5 rounded-lg transition-colors cursor-pointer border border-amber-300 dark:border-amber-500/40"
               >
                 <Icons.Lock />
                 <span>{pinCopied ? '¡PIN Copiado!' : 'Copiar PIN'}</span>
@@ -656,9 +681,9 @@ export default function TrackingPage({
             )}
           </div>
 
-          <div className="mt-4 p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl flex items-start space-x-3">
-            <span className="text-amber-700 text-sm mt-0.5">⚠️</span>
-            <p className="text-xs text-amber-900 leading-relaxed font-medium">
+          <div className="mt-4 p-3.5 bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl flex items-start space-x-3 transition-colors">
+            <span className="text-amber-700 dark:text-amber-400 text-sm mt-0.5">⚠️</span>
+            <p className="text-xs text-amber-900 dark:text-amber-200 leading-relaxed font-medium">
               <strong>Importante:</strong> Dicta este código de 4 dígitos <span className="underline">únicamente</span> al repartidor cuando tengas tu pedido físicamente en mano. Nunca lo envíes por mensaje ni por llamada.
             </p>
           </div>
@@ -669,7 +694,7 @@ export default function TrackingPage({
             "Movimiento del repartidor en tiempo real consumiendo coordenadas WebSocket"
             ═══════════════════════════════════════════════════════════════════ */}
         <section className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
-          <div className="p-4 bg-slate-800 dark:bg-slate-900 text-white flex items-center justify-between transition-colors">
+          <div className="p-4 bg-slate-800 dark:bg-slate-950 text-white flex items-center justify-between transition-colors">
             <div className="flex items-center space-x-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
               <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
@@ -682,7 +707,7 @@ export default function TrackingPage({
           </div>
 
           {/* Lienzo del Mapa (Renderizador SVG interactivo de alta fidelidad) */}
-          <div className="relative w-full h-80 sm:h-96 bg-slate-100 overflow-hidden select-none">
+          <div className="relative w-full h-80 sm:h-96 bg-slate-100 dark:bg-slate-900 overflow-hidden select-none transition-colors">
             {/* Cuadrícula de calles y avenidas simuladas */}
             <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -763,7 +788,7 @@ export default function TrackingPage({
               <div className="text-left">
                 <div className="flex items-center space-x-1.5">
                   <span className="font-bold text-sm text-slate-900 dark:text-white">{orderState.driver.name}</span>
-                  <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                  <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 transition-colors">
                     {orderState.driver.level}
                   </span>
                 </div>
@@ -785,7 +810,7 @@ export default function TrackingPage({
           </h4>
           <div className="space-y-4">
             <div className="flex items-start space-x-3">
-              <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 mt-0.5">
+              <span className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5 transition-colors">
                 <Icons.Store />
               </span>
               <div>
@@ -796,7 +821,7 @@ export default function TrackingPage({
             </div>
 
             <div className="flex items-start space-x-3">
-              <span className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 mt-0.5">
+              <span className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 mt-0.5 transition-colors">
                 <Icons.Home />
               </span>
               <div>
@@ -816,7 +841,7 @@ export default function TrackingPage({
             <div>
               <h4 className="text-sm font-extrabold uppercase tracking-wider text-slate-800 dark:text-white flex items-center gap-2">
                 <span>Resumen de Costo ($ USD)</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 transition-colors">
                   Dólar Estadounidense
                 </span>
               </h4>
@@ -824,7 +849,7 @@ export default function TrackingPage({
                 Facturación oficial • Cobertura Urbana Tulcán, Carchi (Ecuador)
               </p>
             </div>
-            <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
+            <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 px-2.5 py-1 rounded-lg transition-colors">
               $ USD
             </span>
           </div>
@@ -850,7 +875,7 @@ export default function TrackingPage({
             <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 text-xs">
               <span className="flex items-center gap-1.5">
                 <span>Tarifa de Envío Urbana (Tulcán &lt; 3.0 km)</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-200 font-medium">PostGIS</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 font-medium transition-colors">PostGIS</span>
               </span>
               <span className="font-mono font-semibold">${orderState.shippingCost} USD</span>
             </div>
@@ -983,7 +1008,7 @@ export default function TrackingPage({
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Escribe un mensaje al repartidor..."
-                className="flex-1 text-sm bg-slate-100 border-none rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                className="flex-1 text-sm bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors"
               />
               <button
                 type="submit"

@@ -2,103 +2,104 @@ import React, { useState, useEffect } from 'react';
 import { buildApiUrl, getAuthToken } from '../../../services/api';
 import { getCurrentUser } from '../../../utils/auth';
 
-// Restaurantes y Menús Reales de Tulcán, Carchi
-const TULCAN_RESTAURANTS = [
-  {
-    id: '11111111-1111-1111-1111-111111111111',
-    name: 'Asadero El Leñador',
-    category: 'Asadero & Carnes',
-    address: 'Av. Sucre y Bolívar, Centro Comercial, Tulcán',
-    lat: 0.8116,
-    lon: -77.7172,
-    badge: 'Popular en Tulcán',
-    rating: '4.8 ★',
-    prepTime: '20-30 min',
-    bankInfo: {
-      bank: 'Banco Pichincha',
-      accountType: 'Cuenta de Ahorros',
-      accountNumber: '2201928374',
-      holderName: 'Patricio Benavides Cárdenas',
-      idNumber: '0491500042001',
-      qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_LENADOR_2201928374'
-    },
-    menu: [
-      { id: '22222222-2222-2222-2222-000000000001', name: 'Pollo Asado Entero Familiar', desc: 'Incluye porción grande de papas pastusas, menestra y ensalada fresca', price: 11.00 },
-      { id: '22222222-2222-2222-2222-000000000002', name: 'Medio Pollo Asado con Guarnición', desc: 'Medio pollo asado al leño con papas fritas y ensalada', price: 6.00 },
-      { id: '22222222-2222-2222-2222-000000000003', name: 'Combo Empanadas de Morocho (x3)', desc: 'Empanadas de carne de res con ají tulcaneño', price: 2.50 },
-      { id: '22222222-2222-2222-2222-000000000004', name: 'Jarra de Jugo de Mora Silvestre 1L', desc: 'Jugo natural de fruta fresca de los Andes', price: 2.00 }
-    ]
-  },
-  {
-    id: '11111111-1111-1111-1111-222222222222',
-    name: 'Cafetería La Carchi',
-    category: 'Cafetería Tradicional',
-    address: 'Calle 10 de Agosto y Olmedo, Tulcán',
-    lat: 0.8125,
-    lon: -77.7160,
-    badge: 'Tradición Pastusa',
-    rating: '4.9 ★',
-    prepTime: '15-20 min',
-    bankInfo: {
-      bank: 'Cooperativa Tulcán',
-      accountType: 'Cuenta de Ahorros',
-      accountNumber: '1040582910',
-      holderName: 'Elena Villarreal Montenegro',
-      idNumber: '0401829471',
-      qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_LACARCHI_1040582910'
-    },
-    menu: [
-      { id: '22222222-2222-2222-2222-000000000005', name: 'Desayuno Tradicional del Carchi', desc: 'Huevos al gusto, queso tierno de Tulcán, pan de casa y café pasado', price: 3.50 },
-      { id: '22222222-2222-2222-2222-000000000006', name: 'Café Pasado Lojano de Altura', desc: 'Taza de café arábica recién filtrado', price: 1.50 },
-      { id: '22222222-2222-2222-2222-000000000005', name: 'Café Pastuso + Empanadas de Viento', desc: 'Café de altura filtrado con 2 empanadas crujientes con azúcar', price: 2.50 },
-      { id: '22222222-2222-2222-2222-000000000005', name: 'Desayuno Carchiense Completo', desc: 'Tigrillo con queso amasado de Tulcán, 2 huevos fritos y café negro', price: 4.50 }
-    ]
-  },
-  {
-    id: '11111111-1111-1111-1111-333333333333',
-    name: 'Farmacia Cruz del Norte',
-    category: 'Farmacia & Salud',
-    address: 'Av. Coral y 10 de Agosto, Tulcán',
-    lat: 0.8130,
-    lon: -77.7180,
-    badge: 'Atención 24/7',
-    rating: '4.7 ★',
-    prepTime: '10-15 min',
-    bankInfo: {
-      bank: 'Banco Guayaquil',
-      accountType: 'Cuenta Corriente',
-      accountNumber: '4419203817',
-      holderName: 'Farmacias y Salud Carchi S.A.',
-      idNumber: '0491823901001',
-      qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_FARMACIA_4419203817'
-    },
-    menu: [
-      { id: '33333333-3333-3333-3333-000000000001', name: 'Kit Básico de Primeros Auxilios', desc: 'Alcohol antiséptico, gasas, vendas, curitas y analgésicos', price: 8.50 },
-      { id: '33333333-3333-3333-3333-000000000002', name: 'Multivitamínico Efervescente C', desc: 'Tubo de 20 tabletas efervescentes sabor naranja', price: 5.00 }
-    ]
-  }
-];
+// Datos bancarios de respaldo para cuando el backend no responde
+// (se sobreescriben con datos reales al cargar)
+const FALLBACK_BANK = {
+  bank: 'Banco Pichincha',
+  accountType: 'Cuenta de Ahorros',
+  accountNumber: '2201928374',
+  holderName: 'Comercio Asociado Tulcán',
+  idNumber: '0491500042001',
+  qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_PAGO_2201928374'
+};
 
 export default function RestaurantCheckout({ onOrderConfirmed }) {
-  const [selectedRestaurant, setSelectedRestaurant] = useState(TULCAN_RESTAURANTS[0]);
-  const [cart, setCart] = useState([
-    { id: '22222222-2222-2222-2222-000000000001', name: 'Pollo Asado Entero Familiar', price: 11.00, quantity: 1 }
-  ]);
-  const [deliveryAddress, setDeliveryAddress] = useState('Calle Brasil y Av. Tulcanaza (Sector Terminal Terrestre), Tulcán, Carchi');
-  const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' | 'pichincha' | 'deuna'
+  // ── Estado principal ─────────────────────────────────────────────────────
+  const [merchants, setMerchants]               = useState([]);
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [menu, setMenu]                         = useState([]);
+  const [loadingMerchants, setLoadingMerchants] = useState(true);
+  const [loadingMenu, setLoadingMenu]           = useState(false);
+  const [cart, setCart]                         = useState([]);
+  const [deliveryAddress, setDeliveryAddress]   = useState('Calle Brasil y Av. Tulcanaza (Sector Terminal Terrestre), Tulcán, Carchi');
+  const [paymentMethod, setPaymentMethod]       = useState('cash');
   const [paymentReference, setPaymentReference] = useState('');
-  const [copiedField, setCopiedField] = useState(null);
-  const [paymentError, setPaymentError] = useState(null);
-  const [notes, setNotes] = useState('Entregar en puerta principal, timbre 2B');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copiedField, setCopiedField]           = useState(null);
+  const [paymentError, setPaymentError]         = useState(null);
+  const [notes, setNotes]                       = useState('Entregar en puerta principal, timbre 2B');
+  const [isSubmitting, setIsSubmitting]         = useState(false);
   const [createdOrderData, setCreatedOrderData] = useState(null);
 
-  const SHIPPING_FEE = 1.50; // $1.50 USD estándar Tulcán
+  const SHIPPING_FEE = 1.50;
 
   const [liveBankDetails, setLiveBankDetails] = useState(null);
 
-  // Consultar en vivo a PostgreSQL los datos bancarios actualizados del comercio
+  // ── Cargar comercios activos desde el backend ────────────────────────────
   useEffect(() => {
+    let isMounted = true;
+    async function fetchMerchants() {
+      setLoadingMerchants(true);
+      try {
+        const token = getAuthToken();
+        const res = await fetch(buildApiUrl('/v1/catalog/merchants'), {
+          headers: {
+            'Accept': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          }
+        });
+        if (res.ok && isMounted) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setMerchants(data);
+            setSelectedRestaurant(data[0]);
+          }
+        }
+      } catch (err) {
+        console.warn('No se pudieron cargar los comercios:', err);
+      } finally {
+        if (isMounted) setLoadingMerchants(false);
+      }
+    }
+    fetchMerchants();
+    return () => { isMounted = false; };
+  }, []);
+
+  // ── Cargar menú del comercio seleccionado ────────────────────────────────
+  useEffect(() => {
+    if (!selectedRestaurant?.id) return;
+    let isMounted = true;
+    async function fetchMenu() {
+      setLoadingMenu(true);
+      setMenu([]);
+      try {
+        const token = getAuthToken();
+        const res = await fetch(buildApiUrl(`/v1/catalog/merchants/${selectedRestaurant.id}/products`), {
+          headers: {
+            'Accept': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          }
+        });
+        if (res.ok && isMounted) {
+          const data = await res.json();
+          setMenu(Array.isArray(data) ? data : []);
+        }
+      } catch (err) {
+        console.warn('No se pudo cargar el menú:', err);
+      } finally {
+        if (isMounted) setLoadingMenu(false);
+      }
+    }
+    fetchMenu();
+    return () => { isMounted = false; };
+  }, [selectedRestaurant?.id]);
+
+  // ── Cargar datos bancarios del comercio seleccionado ─────────────────────
+  const [liveBankDetailsLocal, setLiveBankDetailsLocal] = useState(null);
+
+  useEffect(() => {
+    if (!selectedRestaurant?.id) return;
     let isMounted = true;
     async function fetchLiveMerchantBank() {
       try {
@@ -107,65 +108,49 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
           headers: {
             'Accept': 'application/json',
             'ngrok-skip-browser-warning': 'true',
-            'Bypass-Tunnel-Reminder': 'true',
             ...(token ? { Authorization: `Bearer ${token}` } : {})
           }
         });
-        if (res.ok) {
+        if (res.ok && isMounted) {
           const data = await res.json();
-          if (isMounted && data && data.accountNumber) {
-            setLiveBankDetails(data);
-          }
+          if (data?.accountNumber) setLiveBankDetailsLocal(data);
         }
       } catch (err) {
         console.warn('Usando fallback bancario en checkout:', err);
       }
     }
-
     fetchLiveMerchantBank();
     return () => { isMounted = false; };
-  }, [selectedRestaurant]);
+  }, [selectedRestaurant?.id]);
 
-  // Información bancaria segura con fallback para prevenir pantallas en blanco
+  // Información bancaria con fallback
   const getMerchantBankInfo = () => {
-    if (liveBankDetails?.accountNumber) {
+    const src = liveBankDetailsLocal || liveBankDetails;
+    if (src?.accountNumber) {
       return {
-        bank: liveBankDetails.bankName || 'Banco Pichincha',
-        accountType: liveBankDetails.accountType ? `Cuenta de ${liveBankDetails.accountType}` : 'Cuenta de Ahorros',
-        accountNumber: liveBankDetails.accountNumber,
-        holderName: liveBankDetails.accountHolderName || 'Comercio Asociado Tulcán',
-        idNumber: liveBankDetails.accountHolderId || '0491500042001',
-        qrCodeUrl: liveBankDetails.qrCodeUrl || 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_PAGO_2201928374'
+        bank: src.bankName || 'Banco Pichincha',
+        accountType: src.accountType ? `Cuenta de ${src.accountType}` : 'Cuenta de Ahorros',
+        accountNumber: src.accountNumber,
+        holderName: src.accountHolderName || selectedRestaurant?.name || 'Comercio Tulcán',
+        idNumber: src.accountHolderId || '0491500042001',
+        qrCodeUrl: src.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_${src.accountNumber}`
       };
     }
-
     try {
       const stored = localStorage.getItem('active_merchant_bank_info');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed?.accountNumber) {
-          return {
-            bank: parsed.bankName || 'Banco Pichincha',
-            accountType: parsed.accountType ? `Cuenta de ${parsed.accountType}` : 'Cuenta de Ahorros',
-            accountNumber: parsed.accountNumber,
-            holderName: parsed.accountHolderName || 'Comercio Asociado Tulcán',
-            idNumber: parsed.accountHolderId || '0491500042001',
-            qrCodeUrl: parsed.qrCodeUrl || 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_PAGO_2201928374'
-          };
-        }
+        if (parsed?.accountNumber) return {
+          bank: parsed.bankName || 'Banco Pichincha',
+          accountType: parsed.accountType ? `Cuenta de ${parsed.accountType}` : 'Cuenta de Ahorros',
+          accountNumber: parsed.accountNumber,
+          holderName: parsed.accountHolderName || 'Comercio Tulcán',
+          idNumber: parsed.accountHolderId || '0491500042001',
+          qrCodeUrl: parsed.qrCodeUrl || 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_PAGO'
+        };
       }
-    } catch (e) {
-      console.warn('Fallback a datos bancarios del restaurante', e);
-    }
-
-    return selectedRestaurant?.bankInfo || {
-      bank: 'Banco Pichincha',
-      accountType: 'Cuenta de Ahorros',
-      accountNumber: '2201928374',
-      holderName: 'Patricio Benavides Cárdenas (Asadero El Leñador)',
-      idNumber: '0491500042001',
-      qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=DEUNA_TULCAN_LENADOR_2201928374'
-    };
+    } catch (e) { /* ignore */ }
+    return FALLBACK_BANK;
   };
 
   const copyToClipboard = (text, fieldName) => {
@@ -178,6 +163,7 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
 
   // Modificar cantidades en el carrito
   const addToCart = (product) => {
+    const price = typeof product.price === 'number' ? product.price : parseFloat(product.price);
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
@@ -185,7 +171,7 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, price, quantity: 1 }];
     });
   };
 
@@ -231,8 +217,8 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
       customerId: customerId,
       merchantId: selectedRestaurant.id,
       pickupAddress: selectedRestaurant.address,
-      pickupLatitude: selectedRestaurant.lat,
-      pickupLongitude: selectedRestaurant.lon,
+      pickupLatitude: selectedRestaurant?.latitude || 0.8116,
+      pickupLongitude: selectedRestaurant?.longitude || -77.7172,
       deliveryAddress: deliveryAddress,
       deliveryLatitude: 0.8035, // Tulcán Terminal Terrestre
       deliveryLongitude: -77.7245,
@@ -351,7 +337,7 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* ── BANNER CABECERA DE TULCÁN ── */}
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 p-6 rounded-2xl text-white shadow-xl border border-slate-700">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4 bg-slate-900 dark:bg-slate-900/80 p-6 rounded-2xl text-white shadow-xl border border-slate-700/50 dark:border-slate-800 transition-colors">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/30">
@@ -386,33 +372,45 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
               <span>1. Comercios Disponibles en Tulcán</span>
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {TULCAN_RESTAURANTS.map((res) => {
-                const isSelected = selectedRestaurant.id === res.id;
-                return (
-                  <button
-                    key={res.id}
-                    onClick={() => {
-                      setSelectedRestaurant(res);
-                      setCart([]);
-                    }}
-                    className={`text-left p-4 rounded-xl border transition-all ${
-                      isSelected
-                        ? 'bg-amber-500/10 border-amber-500 shadow-md ring-2 ring-amber-500/20'
-                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                        {res.badge}
-                      </span>
-                      <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{res.rating}</span>
-                    </div>
-                    <h3 className="font-bold text-slate-900 dark:text-white text-sm">{res.name}</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{res.category}</p>
-                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2 truncate">📍 {res.address}</p>
-                  </button>
-                );
-              })}
+              {loadingMerchants ? (
+                <div className="col-span-3 py-8 text-center text-slate-400 text-sm">
+                  <div className="inline-block w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mr-2 align-middle" />
+                  Cargando comercios...
+                </div>
+              ) : merchants.length === 0 ? (
+                <div className="col-span-3 py-8 text-center text-slate-400 text-sm">
+                  No hay comercios disponibles en este momento.
+                </div>
+              ) : (
+                merchants.map((res) => {
+                  const isSelected = selectedRestaurant?.id === res.id;
+                  return (
+                    <button
+                      key={res.id}
+                      onClick={() => {
+                        setSelectedRestaurant(res);
+                        setCart([]);
+                      }}
+                      className={`text-left p-4 rounded-xl border transition-all ${
+                        isSelected
+                          ? 'bg-amber-500/10 border-amber-500 shadow-md ring-2 ring-amber-500/20'
+                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                          {res.category || 'Comercio'}
+                        </span>
+                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                          {res.rating ? `${res.rating} ★` : ''}
+                        </span>
+                      </div>
+                      <h3 className="font-bold text-slate-900 dark:text-white text-sm">{res.name}</h3>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2 truncate">📍 {res.address}</p>
+                    </button>
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -422,18 +420,29 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
               <div>
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <span>🍽️</span>
-                  <span>Menú de {selectedRestaurant.name}</span>
+                  <span>Menú de {selectedRestaurant?.name || 'Comercio'}</span>
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Precios oficiales en Dólares de Estados Unidos ($ USD)</p>
               </div>
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
-                ⏱️ Tiempo prep: {selectedRestaurant.prepTime}
+                ⏱️ Prep: 15-30 min
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {selectedRestaurant.menu.map((product) => {
+              {loadingMenu ? (
+                <div className="col-span-2 py-8 text-center text-slate-400 text-sm">
+                  <div className="inline-block w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mr-2 align-middle" />
+                  Cargando menú...
+                </div>
+              ) : menu.length === 0 ? (
+                <div className="col-span-2 py-8 text-center text-slate-400 text-sm">
+                  No hay productos disponibles en este momento.
+                </div>
+              ) : (
+              menu.map((product) => {
                 const inCart = cart.find((i) => i.id === product.id);
+                const price = typeof product.price === 'number' ? product.price : parseFloat(product.price);
                 return (
                   <div
                     key={product.id}
@@ -443,14 +452,14 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
                       <div className="flex justify-between items-start gap-2">
                         <h4 className="font-bold text-slate-900 dark:text-white text-sm">{product.name}</h4>
                         <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                          ${product.price.toFixed(2)} USD
+                          ${price.toFixed(2)} USD
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{product.desc}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{product.description}</p>
                     </div>
 
                     <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
-                      <span className="text-[11px] text-slate-400 dark:text-slate-500">Entrega rápida</span>
+                      <span className="text-[11px] text-slate-400 dark:text-slate-500">{product.category || 'Plato'}</span>
                       {inCart ? (
                         <div className="flex items-center gap-2 bg-amber-500 text-slate-950 px-2 py-1 rounded-lg font-bold text-xs shadow-sm">
                           <button onClick={() => removeFromCart(product.id)} className="px-1.5 hover:bg-amber-600 rounded">
@@ -472,7 +481,8 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
                     </div>
                   </div>
                 );
-              })}
+              })
+              )}
             </div>
           </div>
 
@@ -608,11 +618,11 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
 
                 if (paymentMethod === 'cash') {
                   return (
-                    <div className="mt-3 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5 animate-fadeIn">
+                    <div className="mt-3 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2.5 animate-fadeIn transition-colors">
                       <span className="text-xl">💵</span>
                       <div>
                         <strong className="block font-bold">Pago en Efectivo contra Entrega</strong>
-                        <p className="text-[11px] text-emerald-800 mt-0.5 leading-relaxed">
+                        <p className="text-[11px] text-emerald-800 dark:text-emerald-300 mt-0.5 leading-relaxed">
                           Paga el valor exacto de <strong>${totalAmount.toFixed(2)} USD</strong> al repartidor motorizado cuando entregue tu pedido en Tulcán.
                         </p>
                       </div>
@@ -774,7 +784,7 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
 
               {/* Alerta de Error de Pago */}
               {paymentError && (
-                <div className="mt-2.5 p-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs flex items-center gap-2 animate-shake">
+                <div className="mt-2.5 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-300 dark:border-rose-500/30 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2 animate-shake transition-colors">
                   <span>⚠️</span>
                   <span>{paymentError}</span>
                 </div>
@@ -834,14 +844,14 @@ export default function RestaurantCheckout({ onOrderConfirmed }) {
             </button>
 
             {createdOrderData && (
-              <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
-                <span className="text-xs font-bold text-emerald-800 block">
+              <div className="mt-4 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl text-center transition-colors">
+                <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 block">
                   🎉 ¡Orden Creada Exitosamente!
                 </span>
-                <span className="text-[11px] text-emerald-700 block mt-0.5">
-                  PIN OTP de Seguridad: <strong className="text-emerald-950 font-black">{createdOrderData.deliveryPin || '4829'}</strong>
+                <span className="text-[11px] text-emerald-700 dark:text-emerald-400 block mt-0.5">
+                  PIN OTP de Seguridad: <strong className="text-emerald-950 dark:text-emerald-200 font-black">{createdOrderData.deliveryPin || '4829'}</strong>
                 </span>
-                <span className="text-[10px] text-emerald-600 block mt-1">
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-500 block mt-1">
                   Redirigiendo a seguimiento GPS en vivo...
                 </span>
               </div>

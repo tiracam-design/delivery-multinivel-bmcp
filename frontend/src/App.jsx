@@ -14,7 +14,6 @@ import MerchantApprovals from './modules/admin/pages/MerchantApprovals.jsx';
 import ThemeToggle from './components/ThemeToggle.jsx';
 import BankSettingsSection from './components/BankSettingsSection.jsx';
 import { getCurrentUser, getAuthToken, logout, hasAnyRole, getModuleForRole, decodeJwt } from './utils/auth.js';
-import { getInitialTheme, applyTheme } from './utils/theme.js';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(getCurrentUser());
@@ -43,10 +42,8 @@ export default function App() {
     return () => window.removeEventListener('order-updated', handleOrderUpdate);
   }, []);
 
-  // Inicializar tema visual
-  useEffect(() => {
-    applyTheme(getInitialTheme());
-  }, []);
+  // El tema ya fue aplicado por el script anti-FOUC en index.html.
+  // No re-aplicar aquí para evitar flash innecesario.
 
   // Función de redirección dinámica según el rol del payload JWT
   const redirectToModuleByRole = (user) => {
@@ -140,12 +137,10 @@ export default function App() {
               <div className="hidden sm:flex items-center space-x-2 text-[10px] text-slate-500 dark:text-slate-400">
                 <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                  Spring Boot :8080 (JWT Activo)
+                  Sistema Activo
                 </span>
                 <span>•</span>
-                <span className="text-sky-600 dark:text-sky-300">PostGIS :5432</span>
-                <span>•</span>
-                <span className="text-amber-600 dark:text-amber-300">Redis :6379</span>
+                <span>Tulcán, Carchi 🇪🇨</span>
               </div>
             </div>
           </div>
@@ -397,7 +392,7 @@ export default function App() {
       {/* ── 4. MODAL INSPECTOR DE TOKEN JWT ─────────────────────────────────── */}
       {showTokenModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl text-slate-900 dark:text-slate-100 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl text-slate-900 dark:text-slate-100 animate-fadeIn transition-colors">
             <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2.5">
                 <span className="text-2xl">🔐</span>

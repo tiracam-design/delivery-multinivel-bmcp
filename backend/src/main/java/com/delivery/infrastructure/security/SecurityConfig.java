@@ -1,5 +1,7 @@
 package com.delivery.infrastructure.security;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -11,12 +13,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 /**
  * Configuración de Spring Security con arquitectura Stateless y autenticación JWT.
@@ -84,7 +83,7 @@ public class SecurityConfig {
 
                 // Reglas de autorización por ruta y roles
                 .authorizeHttpRequests(auth -> auth
-                        // Rutas públicas: autenticación, documentación Swagger y WebSockets
+                        // Rutas públicas: autenticación, documentación Swagger, WebSockets y catálogo
                         .requestMatchers(
                                 "/v1/auth/**",
                                 "/auth/**",
@@ -93,6 +92,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/ws-delivery/**",
                                 "/ws-delivery",
+                                "/v1/catalog/**",
                                 "/error"
                         ).permitAll()
 

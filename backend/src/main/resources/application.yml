@@ -8,7 +8,7 @@ spring:
 
   # ── PostgreSQL + PostGIS ──────────────────────────────────────────────
   datasource:
-    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:delivery_db}?currentSchema=bmcp_app,public}}
+    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:delivery_db}?currentSchema=bmcp_app,public}}
     username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:delivery_user}}
     password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:delivery_pass}}
     driver-class-name: org.postgresql.Driver

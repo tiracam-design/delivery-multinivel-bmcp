@@ -60,11 +60,11 @@ export default function LoginPage({ onLoginSuccess }) {
     if (focusedField === 'password') {
       return 'border-emerald-500/60 dark:border-emerald-500/60 shadow-[0_0_55px_-10px_rgba(16,185,129,0.35)] ring-1 ring-emerald-500/40';
     }
-    return 'border-slate-700/60 dark:border-slate-800 border-slate-200/90 shadow-2xl';
+    return 'border-slate-200/90 dark:border-slate-700/60 shadow-2xl';
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-between overflow-hidden bg-slate-950 dark:bg-slate-950 bg-slate-50 text-slate-100 dark:text-slate-100 text-slate-900 transition-colors duration-500">
+    <div className="relative min-h-screen flex flex-col justify-between overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
       
       {/* ── 1. FONDO DE MAPA INTERACTIVO (PARALLAX + NODOS GPS + RADAR) ──────── */}
       <InteractiveMapBackground activeField={focusedField} />
@@ -103,7 +103,7 @@ export default function LoginPage({ onLoginSuccess }) {
           
           {/* Tarjeta de Login Glassmorphic con Resplandor Dinámico */}
           <div
-            className={`bg-slate-900/85 dark:bg-slate-900/85 bg-white/90 backdrop-blur-2xl py-8 px-6 sm:px-10 rounded-3xl border transition-all duration-500 ${getCardDynamicGlow()}`}
+            className={`bg-white/90 dark:bg-slate-900/85 backdrop-blur-2xl py-8 px-6 sm:px-10 rounded-3xl border transition-all duration-500 ${getCardDynamicGlow()}`}
           >
             
             {/* Encabezado del Formulario */}
@@ -238,7 +238,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-slate-900 px-3 text-slate-400 font-semibold tracking-wider text-[11px]">
+                <span className="bg-white dark:bg-slate-900 px-3 text-slate-400 font-semibold tracking-wider text-[11px] transition-colors">
                   O continúa con
                 </span>
               </div>

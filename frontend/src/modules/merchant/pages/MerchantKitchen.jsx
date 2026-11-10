@@ -684,7 +684,7 @@ export default function MerchantKitchen() {
           </div>
           <button
             onClick={handleToggleKitchenPause}
-            className="px-3 py-1 bg-white text-rose-700 hover:bg-rose-50 dark:bg-rose-600 dark:hover:bg-rose-500 dark:text-white rounded-lg text-[11px] font-black uppercase transition-all shadow-md active:scale-95"
+            className="px-3 py-1 bg-slate-50 dark:bg-rose-600 text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500 dark:text-white rounded-lg text-[11px] font-black uppercase transition-all shadow-md active:scale-95 border border-rose-200 dark:border-transparent"
           >
             ▶ Reanudar Ahora
           </button>
@@ -784,7 +784,7 @@ export default function MerchantKitchen() {
         <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
           {/* Indicadores de Estado */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white dark:bg-slate-900/80 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm dark:shadow-lg transition-colors">
+            <div className="bg-slate-50 dark:bg-slate-900/80 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm dark:shadow-lg transition-colors">
               <div>
                 <span className="text-xs uppercase font-extrabold text-amber-600 dark:text-amber-400 block tracking-wider">
                   Nuevos / Pendientes
@@ -794,7 +794,7 @@ export default function MerchantKitchen() {
               <span className="text-3xl text-amber-500/40">⏳</span>
             </div>
 
-            <div className="bg-white dark:bg-slate-900/80 border border-sky-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm dark:shadow-lg transition-colors">
+            <div className="bg-slate-50 dark:bg-slate-900/80 border border-sky-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm dark:shadow-lg transition-colors">
               <div>
                 <span className="text-xs uppercase font-extrabold text-sky-600 dark:text-sky-400 block tracking-wider">
                   En Preparación
@@ -804,7 +804,7 @@ export default function MerchantKitchen() {
               <span className="text-3xl text-sky-500/40">🔥</span>
             </div>
 
-            <div className="bg-white dark:bg-slate-900/80 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm dark:shadow-lg transition-colors">
+            <div className="bg-slate-50 dark:bg-slate-900/80 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between shadow-sm dark:shadow-lg transition-colors">
               <div>
                 <span className="text-xs uppercase font-extrabold text-emerald-600 dark:text-emerald-400 block tracking-wider">
                   Listos para Retiro
@@ -827,10 +827,10 @@ export default function MerchantKitchen() {
                   key={order.id}
                   className={`rounded-2xl border flex flex-col justify-between transition-all shadow-md dark:shadow-xl ${
                     isPending
-                      ? 'bg-white dark:bg-amber-950/20 border-amber-300 dark:border-amber-500/50 hover:border-amber-400'
+                      ? 'bg-slate-50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-500/50 hover:border-amber-400'
                       : isPreparing
-                      ? 'bg-white dark:bg-sky-950/20 border-sky-300 dark:border-sky-500/50 hover:border-sky-400'
-                      : 'bg-white dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-500/50 hover:border-emerald-400'
+                      ? 'bg-slate-50 dark:bg-sky-950/20 border-sky-300 dark:border-sky-500/50 hover:border-sky-400'
+                      : 'bg-slate-50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-500/50 hover:border-emerald-400'
                   }`}
                 >
                   {/* Encabezado del Ticket */}
@@ -892,7 +892,7 @@ export default function MerchantKitchen() {
 
                   {/* Repartidor asignado si está listo */}
                   {isReady && order.driverName && (
-                    <div className="px-4 py-2.5 bg-emerald-50 dark:bg-emerald-950/40 border-t border-emerald-200 dark:border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                    <div className="px-4 py-2.5 bg-emerald-50 dark:bg-emerald-950/40 border-t border-emerald-200 dark:border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2 transition-colors">
                       <span>🛵</span>
                       <span>Repartidor: <strong>{order.driverName}</strong></span>
                     </div>
@@ -940,7 +940,7 @@ export default function MerchantKitchen() {
                 onClick={() => setActiveTab('orders')}
                 className={`flex-1 py-3 text-xs font-bold transition-all border-b-2 flex items-center justify-center gap-1.5 ${
                   activeTab === 'orders'
-                    ? 'border-amber-500 text-amber-600 dark:text-amber-400 bg-white dark:bg-slate-900'
+                    ? 'border-amber-500 text-amber-600 dark:text-amber-400 bg-slate-50 dark:bg-slate-900'
                     : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
@@ -952,7 +952,7 @@ export default function MerchantKitchen() {
                 onClick={() => setActiveTab('finances')}
                 className={`flex-1 py-3 text-xs font-bold transition-all border-b-2 flex items-center justify-center gap-1.5 ${
                   activeTab === 'finances'
-                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-900'
+                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-slate-50 dark:bg-slate-900'
                     : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
@@ -964,7 +964,7 @@ export default function MerchantKitchen() {
                 onClick={() => setActiveTab('bank')}
                 className={`flex-1 py-3 text-xs font-bold transition-all border-b-2 flex items-center justify-center gap-1.5 ${
                   activeTab === 'bank'
-                    ? 'border-amber-500 text-amber-600 dark:text-amber-400 bg-white dark:bg-slate-900'
+                    ? 'border-amber-500 text-amber-600 dark:text-amber-400 bg-slate-50 dark:bg-slate-900'
                     : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >

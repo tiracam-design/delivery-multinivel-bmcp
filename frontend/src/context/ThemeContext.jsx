@@ -1,38 +1,40 @@
 // ══════════════════════════════════════════════════════════════════════════
 // ThemeContext — Delivery Multinivel BMCP · Tulcán, Ecuador
-// Contexto global de tema: provee isDark + toggle a toda la app.
-// Uso: const { isDark, toggle } = useTheme()
+//
+// Provee { isDark, toggle } a toda la app vía React Context.
+// El tema inicial lo lee desde el DOM (<html class="dark">) que fue
+// configurado por el script anti-FOUC en index.html, evitando FOUC.
 // ══════════════════════════════════════════════════════════════════════════
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { getInitialTheme, applyTheme } from '../utils/theme.js';
+import { applyTheme } from '../utils/theme.js';
 
 const ThemeContext = createContext({ isDark: true, toggle: () => {} });
 
 export function ThemeProvider({ children }) {
-  const [isDark, setIsDark] = useState(() => getInitialTheme() === 'dark');
+  // Lee el estado real del DOM (lo estableció el script bloqueante en index.html)
+  // — esto garantiza que React y el DOM estén sincronizados desde el primer render.
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
+    }
+    return true; // SSR fallback
+  });
 
-  // Aplica el tema al <html> y persiste en localStorage
-  const applyAndSync = useCallback((dark) => {
-    applyTheme(dark ? 'dark' : 'light');
-    setIsDark(dark);
-  }, []);
-
-  // Inicializar al montar
+  // Escucha cambios de tema provenientes de otras pestañas o de toggleTheme()
   useEffect(() => {
-    applyAndSync(getInitialTheme() === 'dark');
-  }, []);
-
-  // Escuchar cambios externos (ThemeToggle u otras pestañas)
-  useEffect(() => {
-    const handleExternal = (e) => setIsDark(e.detail === 'dark');
+    const handleExternal = (e) => {
+      setIsDark(e.detail === 'dark');
+    };
     window.addEventListener('theme-changed', handleExternal);
     return () => window.removeEventListener('theme-changed', handleExternal);
   }, []);
 
   const toggle = useCallback(() => {
-    applyAndSync(!isDark);
-  }, [isDark, applyAndSync]);
+    const next = !isDark;
+    applyTheme(next ? 'dark' : 'light');
+    setIsDark(next);
+  }, [isDark]);
 
   return (
     <ThemeContext.Provider value={{ isDark, toggle }}>
@@ -44,4 +46,3 @@ export function ThemeProvider({ children }) {
 export function useTheme() {
   return useContext(ThemeContext);
 }
-

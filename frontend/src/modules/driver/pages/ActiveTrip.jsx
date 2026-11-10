@@ -391,7 +391,7 @@ export default function ActiveTrip({ activeOrder = null }) {
   // ═══════════════════════════════════════════════════════════════════════════
   if (tripState === 'SUCCESS_ANIMATION') {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-gradient-to-b from-emerald-950 via-slate-900 to-black text-white p-6 relative overflow-hidden animate-fadeIn">
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-950 dark:bg-slate-950 text-slate-100 dark:text-white p-6 relative overflow-hidden animate-fadeIn transition-colors">
         {/* Anillos de pulso expansivo */}
         <div className="absolute w-72 h-72 rounded-full bg-emerald-500/20 animate-ping pointer-events-none" />
         <div className="absolute w-96 h-96 rounded-full bg-emerald-500/10 pointer-events-none animate-pulse" />
@@ -409,15 +409,15 @@ export default function ActiveTrip({ activeOrder = null }) {
             Pedido Entregado
           </h1>
 
-          <p className="text-slate-300 text-sm mb-6">
+          <p className="text-slate-600 dark:text-slate-300 text-sm mb-6">
             El código OTP fue verificado exitosamente y los fondos han sido liberados de custodia.
           </p>
 
           {/* Tarjeta de ganancia acreditada */}
-          <div className="bg-slate-800/90 border border-emerald-500/40 rounded-2xl p-4 shadow-xl backdrop-blur-md mb-6">
+          <div className="bg-slate-100 dark:bg-slate-800/90 border border-emerald-500/40 rounded-2xl p-4 shadow-xl backdrop-blur-md mb-6 transition-colors">
             <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Ganancia acreditada al instante</p>
-            <p className="text-3xl font-black text-emerald-400 mt-1">{tripData.estimatedEarnings}</p>
-            <p className="text-xs text-emerald-300/80 mt-1 flex items-center justify-center gap-1">
+            <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{tripData.estimatedEarnings}</p>
+            <p className="text-xs text-emerald-700 dark:text-emerald-300/80 mt-1 flex items-center justify-center gap-1">
               <span>✓ Saldo disponible en tu billetera digital</span>
             </p>
           </div>
